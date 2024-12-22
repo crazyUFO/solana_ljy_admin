@@ -2,7 +2,7 @@ version: '3'
 
 services:
   ljy-admin-web:
-    image: ljy-admin-web:stable
+    image: ljy-admin-web:latest
     container_name: ljy-admin-web
     volumes:
       - ./deploy/web:/etc/nginx/conf.d
@@ -54,7 +54,7 @@ services:
       context: .
       args:
         - PROJECT_DIR=${PROJECT_DIR}
-    image: ljy-admin-server:stable
+    image: ljy-admin-server:latest
     container_name: ljy-admin-server
     restart: always
     env_file:
