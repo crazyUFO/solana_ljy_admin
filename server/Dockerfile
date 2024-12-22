@@ -11,6 +11,9 @@ ENV DB_HOST=mysql \
 # 配置 npm 镜像加速器（使用淘宝镜像）
 RUN npm config set registry https://registry.npmmirror.com
 
+# 安装 pnpm（确保它能够执行）
+RUN npm install -g pnpm
+
 # 安装 pm2（使用 npm 安装）
 RUN npm install -g pm2
 
@@ -29,11 +32,11 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
 
 # 安装生产环境依赖
 FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile
 
 # 构建阶段
 FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 RUN pnpm run build
 
 # 最终镜像，复制生产依赖和构建产物
