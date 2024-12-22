@@ -1,43 +1,45 @@
-# 使用 node:20-slim 基础镜像
-FROM node:20-slim AS base
+# 使用 node:22-slim 基础镜像
+FROM node:22-slim AS base
 
 # 设置环境变量
-ARG PROJECT_DIR=/server  # 根据你的项目路径修改
-ARG PNPM_HOME="/pnpm"
-ENV PNPM_HOME=$PNPM_HOME
+ARG PROJECT_DIR
 ENV DB_HOST=mysql \
     APP_PORT=7001 \
+    PNPM_HOME="/pnpm" \
     PATH="$PNPM_HOME:$PATH"
 
-# 安装 yarn 和启用 corepack
-RUN npm install -g yarn
+# 启用 corepack（用于管理 yarn 和 pnpm）并安装 pm2
 RUN corepack enable && yarn global add pm2
 
 # 设置工作目录
 WORKDIR $PROJECT_DIR
+
+# 复制项目文件到容器中
 COPY ./ $PROJECT_DIR
+
+# 给脚本文件添加可执行权限
 RUN chmod +x ./wait-for-it.sh 
 
 # 设置时区为上海
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo 'Asia/Shanghai' > /etc/timezone
 
-# 第二阶段：安装生产依赖
+# 安装生产环境依赖
 FROM base AS prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
-# 第三阶段：构建应用
+# 构建阶段
 FROM base AS build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
 
-# 最终镜像
+# 最终镜像，复制生产依赖和构建产物
 FROM base
 COPY --from=prod-deps $PROJECT_DIR/node_modules $PROJECT_DIR/node_modules
 COPY --from=build $PROJECT_DIR/dist $PROJECT_DIR/dist
 
-# 暴露应用端口
+# 暴露端口
 EXPOSE $APP_PORT
 
-# 使用 pm2 启动生产环境应用
-ENTRYPOINT ["./wait-for-it.sh", "$DB_HOST:$DB_PORT", "--", "pnpm", "migration:run", "&&", "pm2-runtime", "ecosystem.config.js"]
+# 使用 PM2 启动应用（保留 PM2 相关部分）
+ENTRYPOINT ./wait-for-it.sh $DB_HOST:$DB_PORT -- pnpm migration:run && pm2-runtime ecosystem.config.js
