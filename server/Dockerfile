@@ -8,8 +8,11 @@ ENV DB_HOST=mysql \
     PNPM_HOME="/pnpm" \
     PATH="$PNPM_HOME:$PATH"
 
-# 启用 corepack（用于管理 yarn 和 pnpm）并安装 pm2
-RUN corepack enable && yarn global add pm2
+# 配置 npm 镜像加速器（使用淘宝镜像）
+RUN npm config set registry https://registry.npmmirror.com
+
+# 安装 pm2（使用 npm 安装）
+RUN npm install -g pm2
 
 # 设置工作目录
 WORKDIR $PROJECT_DIR
