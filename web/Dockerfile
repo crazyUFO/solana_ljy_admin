@@ -27,7 +27,7 @@ ARG PROJECT_DIR
 COPY --from=builder $PROJECT_DIR/dist/ /usr/share/nginx/html
 
 # 你可以选择将自定义的 nginx 配置文件也复制过来，取消下面的注释即可
-# COPY --from=builder $PROJECT_DIR/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder $PROJECT_DIR/nginx.conf /etc/nginx/nginx.conf
 
 # 暴露 80 端口
 EXPOSE 80
