@@ -17,8 +17,8 @@ WORKDIR /server
 # 将当前项目文件复制到容器中
 COPY ./ /server
 
-# 安装 pnpm (如果尚未安装)
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# 安装 pnpm
+RUN npm install -g pnpm
 
 # 使用镜像加速，设置 npm 和 pnpm 的镜像源为中国大陆的镜像
 # RUN npm config set registry https://registry.npmmirror.com \
