@@ -1,51 +1,19 @@
-# 使用 node:22-slim 基础镜像
-FROM node:22-slim AS base
-
-# 设置环境变量
-ARG PROJECT_DIR
-ENV DB_HOST=mysql \
-    APP_PORT=7001 \
-    PNPM_HOME="/pnpm" \
-    PATH="$PNPM_HOME:$PATH"
-
-# 配置 npm 镜像加速器（使用淘宝镜像）
-RUN npm config set registry https://registry.npmmirror.com
-
-# 安装 pnpm（确保它能够执行）
-RUN npm install -g pnpm
-
-# 安装 pm2（使用 npm 安装）
-RUN npm install -g pm2
+# 使用官方 Node.js 22 镜像作为基础镜像
+FROM node:22
 
 # 设置工作目录
-WORKDIR $PROJECT_DIR
+WORKDIR /server
 
-# 复制项目文件到容器中
-COPY ./ $PROJECT_DIR
+# 将项目中的 dist 文件夹复制到镜像中的工作目录
+COPY ./dist ./dist
 
-# 给脚本文件添加可执行权限
-RUN chmod +x ./wait-for-it.sh 
+# 安装项目的依赖项（如果需要的话）
+# 如果你有 package.json 和 package-lock.json 文件，取消注释以下两行并添加到 dist 文件夹中
+# COPY package*.json ./
+# RUN npm install --production
 
-# 设置时区为上海
-RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo 'Asia/Shanghai' > /etc/timezone
+# 让 Node.js 启动 main.js 并监听 7001 端口
+CMD ["node", "./dist/main.js"]
 
-# 安装生产环境依赖
-FROM base AS prod-deps
-RUN pnpm install --prod --frozen-lockfile
-
-# 构建阶段
-FROM base AS build
-RUN pnpm install --frozen-lockfile
-RUN pnpm run build
-
-# 最终镜像，复制生产依赖和构建产物
-FROM base
-COPY --from=prod-deps $PROJECT_DIR/node_modules $PROJECT_DIR/node_modules
-COPY --from=build $PROJECT_DIR/dist $PROJECT_DIR/dist
-
-# 暴露端口
-EXPOSE $APP_PORT
-
-# 使用 PM2 启动应用（保留 PM2 相关部分）
-ENTRYPOINT ./wait-for-it.sh $DB_HOST:$DB_PORT -- pnpm migration:run && pm2-runtime ecosystem.config.js
+# 暴露服务端口
+EXPOSE 7001
