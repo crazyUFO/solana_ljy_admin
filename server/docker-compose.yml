@@ -15,7 +15,6 @@ services:
     depends_on:
       - mysql
       - redis
-    command: ["sh", "-c", "wait-for-it mysql:3306 -- wait-for-it redis:6379 -- npm run start"]  # 使用wait-for-it等待MySQL和Redis启动
     
   mysql:
     image: mysql:latest
