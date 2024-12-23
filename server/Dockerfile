@@ -6,6 +6,7 @@ WORKDIR /server
 
 # 将项目中的 dist 文件夹复制到镜像中的工作目录
 COPY ./dist ./dist
+COPY ./node_modules ./node_modules
 
 # 安装项目的依赖项（如果需要的话）
 # 如果你有 package.json 和 package-lock.json 文件，取消注释以下两行并添加到 dist 文件夹中
