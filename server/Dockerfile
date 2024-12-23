@@ -27,7 +27,7 @@ RUN npm install -g pnpm
 # 使用多阶段构建来优化镜像
 # 1. 安装生产依赖
 FROM base AS prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # 2. 安装所有依赖并构建应用
 FROM base AS build
@@ -44,7 +44,7 @@ COPY --from=build /server/dist /server/dist
 EXPOSE $APP_PORT
 
 # 容器启动时执行的命令（运行数据库迁移并启动应用）
-CMD ["pnpm", "migration:run", "start:prod"]
+CMD ["pnpm", "start:prod"]
 
 # 如果需要 PM2 管理进程，可使用以下命令：
 # CMD ["pm2-runtime", "ecosystem.config.js"]
