@@ -1,4 +1,14 @@
 services:
+  ljy-admin-web:
+    image: ljy-admin-web:latest
+    container_name: admin_web
+    ports:
+      - '80:80'
+    volumes:
+      - ./deploy/web:/etc/nginx/conf.d
+    restart: always
+    networks:
+      - ljy_admin_net
   ljy-admin-server:
     image: ljy-admin-server:latest
     container_name: api_server
@@ -12,9 +22,6 @@ services:
     restart: always
     networks:
       - ljy_admin_net
-    depends_on:
-      - mysql
-      - redis
     
   mysql:
     image: mysql:latest
