@@ -21,8 +21,8 @@ COPY ./ /server
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # 使用镜像加速，设置 npm 和 pnpm 的镜像源为中国大陆的镜像
-RUN npm config set registry https://registry.npmmirror.com \
-    && pnpm config set registry https://registry.npmmirror.com
+# RUN npm config set registry https://registry.npmmirror.com \
+#     && pnpm config set registry https://registry.npmmirror.com
 
 # 使用多阶段构建来优化镜像
 # 1. 安装生产依赖
