@@ -1,13 +1,11 @@
-version: '3'
-
 services:
-  vue3-antdv-admin:
+  ljy-admin-web:
     # 从当前路径构建镜像
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    image: buqiyuan/vue3-antdv-admin:latest
+    image: ljy-admin-web:latest
     ports:
       - '80:80'
     env_file:
