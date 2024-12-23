@@ -3,6 +3,7 @@ services:
     image: ljy-admin-server:latest
     container_name: api_server
     env_file:
+      - .env
       - .env.production
     ports:
       - '${APP_PORT}:${APP_PORT}'
@@ -21,6 +22,7 @@ services:
     container_name: api_mysql
     restart: always
     env_file:
+      - .env
       - .env.production
     environment:
       - MYSQL_HOST=${DB_HOST}
@@ -43,6 +45,7 @@ services:
     container_name: api_redis
     restart: always
     env_file:
+      - .env
       - .env.production
     ports:
       - '${REDIS_PORT}:6379'
