@@ -6,8 +6,8 @@ export const serversettingColumns: TableColumn[] = [
     title: '名称',
     dataIndex: 'name',
   },
-  {
-    title: 'ip地址',
-    dataIndex: 'ip',
-  },
+  // {
+  //   title: 'ip地址',
+  //   dataIndex: 'ip',
+  // },
 ];

@@ -7,30 +7,30 @@ export const serversettingSchemas: FormSchema[] = [
     label: '名称',
     rules: [{ required: true }],
   },
-  {
-    field: 'ip',
-    component: 'Input',
-    label: 'ip地址',
-    rules: [{ required: true }],
-  },
-  {
-    field: 'port',
-    component: 'Input',
-    colProps: {
-      span: 12,
-    },
-    label: '端口',
-    rules: [{ required: true }],
-  },
-  {
-    field: 'password',
-    component: 'Input',
-    colProps: {
-      span: 12,
-    },
-    label: '密码',
-    rules: [{ required: true }],
-  },
+  // {
+  //   field: 'ip',
+  //   component: 'Input',
+  //   label: 'ip地址',
+  //   rules: [{ required: true }],
+  // },
+  // {
+  //   field: 'port',
+  //   component: 'Input',
+  //   colProps: {
+  //     span: 12,
+  //   },
+  //   label: '端口',
+  //   rules: [{ required: true }],
+  // },
+  // {
+  //   field: 'password',
+  //   component: 'Input',
+  //   colProps: {
+  //     span: 12,
+  //   },
+  //   label: '密码',
+  //   rules: [{ required: true }],
+  // },
   {
     field: 'SOLSCAN_TOKEN',
     component: 'Input',

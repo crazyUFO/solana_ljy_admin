@@ -53,6 +53,16 @@ export function restartServer(params: any) {
   });
 }
 
+/**
+ * @description 删除
+ */
+export function deleteServer(params: any) {
+  return request({
+    url: `/api/nodes/${params.id}`,
+    method: 'DELETE',
+  });
+}
+
 // /**
 //  * @description 获取英雄联盟英雄列表
 //  */
