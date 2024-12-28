@@ -15,7 +15,7 @@ export class ServersController {
   ) {
     // 连接到外部 Redis 服务器
     this.redis = new Redis({
-      host: 'host.docker.internal', // 外部 Redis 服务器的 IP 地址
+      host: '192.168.31.110', // 外部 Redis 服务器的 IP 地址
       port: 16379, // Redis 端口
       password: 'xiaosan@2020', // Redis 密码（如果有的话）
       db: 0, // 默认 Redis 数据库
