@@ -1,10 +1,11 @@
 // src/user/user.controller.ts
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import Redis from 'ioredis'
 // import { InjectRedis } from '~/common/decorators/inject-redis.decorator'
 import { Public } from '../auth/decorators/public.decorator'
 import { Servers } from './entities/servers.entity'
-import { ServersService } from './servers.service'
+import { ServersService } from './servers.service' // 引入 ConfigService
 
 @Controller('nodes') // API 路径: /nodes
 @Public()
@@ -12,13 +13,20 @@ export class ServersController {
   private redis: Redis
   constructor(
     private readonly ServersService: ServersService,
+    private configService: ConfigService, // 注入 ConfigService
   ) {
+    // 通过 ConfigService 获取 Redis 配置信息
+    const redisHost = this.configService.get<string>('REDIS_HOST2')
+    const redisPort = this.configService.get<number>('REDIS_PORT2')
+    const redisPassword = this.configService.get<string>('REDIS_PASSWORD2')
+    const redisDb = this.configService.get<number>('REDIS_DB2')
+    console.log(redisHost, redisPort, redisPassword, redisDb)
     // 连接到外部 Redis 服务器
     this.redis = new Redis({
-      host: '192.168.31.110', // 外部 Redis 服务器的 IP 地址
-      port: 16379, // Redis 端口
-      password: 'xiaosan@2020', // Redis 密码（如果有的话）
-      db: 0, // 默认 Redis 数据库
+      host: redisHost, // 外部 Redis 服务器的 IP 地址
+      port: redisPort, // Redis 端口
+      password: redisPassword, // Redis 密码（如果有的话）
+      db: redisDb, // 默认 Redis 数据库
     })
   }
 
