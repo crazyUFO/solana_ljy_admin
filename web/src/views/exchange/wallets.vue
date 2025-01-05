@@ -3,7 +3,7 @@
     ref="dynamicTableRef"
     size="small"
     bordered
-    :data-request="getServerList"
+    :data-request="getWalletList"
     :columns="columns"
     row-key="heroid"
     :search="false"
@@ -25,7 +25,7 @@
       <a-button
         type="primary"
         :disabled="!$auth('system:role:create')"
-        @click="openServerModal({})"
+        @click="openWalletModal({})"
       >
         新增
       </a-button>
@@ -34,75 +34,53 @@
 </template>
 
 <script lang="ts" setup>
-  import { notification } from 'ant-design-vue';
-  import { serversettingColumns, type TableListItem, type TableColumnItem } from './columns';
-  import { serversettingSchemas } from './formSchemas';
+  import { walletColumns, type TableColumnItem, type TableListItem } from './columns';
+  import { WalletSchemas } from './formSchemas';
   import { useTable } from '@/components/core/dynamic-table';
   import { useFormModal } from '@/hooks/useModal/';
-  import {
-    getServerList,
-    updateServer,
-    createServer,
-    restartServer,
-    deleteServer,
-  } from '@/api/servers/manage';
+  import { getWalletList, createWallet, deleteWallet, updateWallet } from '@/api/exchange/manage';
 
   const [DynamicTable, dynamicTableInstance] = useTable();
-
   const [showModal] = useFormModal();
   /**
    * @description 打开操作用户弹窗
    */
-  const openServerModal = async (record: Partial<TableListItem> = {}) => {
+  const openWalletModal = async (record: Partial<TableListItem> = {}) => {
     const [formRef] = await showModal({
       modalProps: {
-        title: `${record.id ? '编辑' : '新增'}服务器设置`,
+        title: `${record.id ? '编辑' : '新增'}交易所地址`,
         width: 700,
         onFinish: async (values) => {
           values.id = record.id;
-          let settings = {};
-          for (let key in values) {
-            if (['name', 'ip', 'password', 'port'].every((val) => val != key)) {
-              settings[key] = values[key];
-            }
-          }
           let params = {
-            name: values.name,
-            // ip: values.ip,
-            // password: values.password,
-            // port: values.port,
-            settings: JSON.stringify(settings),
+            walletAddress: values.walletAddress,
+            label: values.label,
           };
           if (record.id) {
-            await updateServer({ id: record.id, data: params });
+            await updateWallet({ id: record.id, data: params });
           } else {
-            await createServer(params);
+            await createWallet(params);
           }
           dynamicTableInstance?.reload();
         },
       },
       formProps: {
         labelWidth: 100,
-        schemas: serversettingSchemas,
+        schemas: WalletSchemas,
         autoSubmitOnEnter: true,
       },
     });
 
     if (record.id) {
       console.log(record);
-      let settings = JSON.parse(record.settings);
-      console.log(settings);
       formRef?.setFieldsValue({
-        name: record.name,
-        // ip: record.ip,
-        // port: record.port,
-        // password: record.password,
-        ...settings,
+        walletAddress: record.walletAddress,
+        label: record.label,
       });
     }
   };
   const columns: TableColumnItem[] = [
-    ...serversettingColumns,
+    ...walletColumns,
     {
       title: '操作',
       width: 200,
@@ -111,35 +89,18 @@
       fixed: 'right',
       actions: ({ record }) => [
         {
-          label: '配置',
+          label: '编辑',
           onClick: () => {
-            openServerModal(record);
-          },
-        },
-        {
-          label: '同步',
-          popConfirm: {
-            title: '你确定要同步该配置到服务器吗？',
-            placement: 'left',
-            onConfirm: async () => {
-              let res = await restartServer({ id: record.id });
-              console.log(res);
-              notification.success({
-                message: `发送成功`,
-                description: `一共同步了${res}台客户端`,
-                duration: 0,
-              });
-            },
+            openWalletModal(record);
           },
         },
         {
           label: '删除',
           popConfirm: {
-            title: '你确定要删除该配置吗？',
+            title: '你确定要删除该地址吗？',
             placement: 'left',
             onConfirm: async () => {
-              let res = await deleteServer({ id: record.id });
-              console.log(res);
+              await deleteWallet({ id: record.id });
               dynamicTableInstance?.reload();
             },
           },
