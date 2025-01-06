@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { ExchangeWallet } from './exchange-wallet.entity'
@@ -10,10 +10,29 @@ export class ExchangeWalletsService {
     private readonly exchangeWalletRepository: Repository<ExchangeWallet>,
   ) {}
 
-  // 创建钱包
+  // 创建钱包并确保钱包地址唯一
   async create(createExchangeWalletDto: Partial<ExchangeWallet>): Promise<ExchangeWallet> {
-    const wallet = this.exchangeWalletRepository.create(createExchangeWalletDto)
-    return this.exchangeWalletRepository.save(wallet)
+    // 先检查钱包地址是否已存在
+    const existingWallet = await this.exchangeWalletRepository.findOne({
+      where: { walletAddress: createExchangeWalletDto.walletAddress },
+    })
+
+    // 如果存在，抛出自定义错误
+    if (existingWallet) {
+      throw new ConflictException('Wallet address already exists.')
+    }
+
+    try {
+      // 创建钱包对象
+      const wallet = this.exchangeWalletRepository.create(createExchangeWalletDto)
+
+      // 保存并返回新创建的钱包
+      return await this.exchangeWalletRepository.save(wallet)
+    }
+    catch (error) {
+      // 如果发生数据库错误，抛出内部服务器错误（500）
+      throw new InternalServerErrorException('Failed to create wallet. Please try again later.')
+    }
   }
 
   // 获取所有钱包
