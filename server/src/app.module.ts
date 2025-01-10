@@ -27,6 +27,7 @@ import { SystemModule } from './modules/system/system.module'
 import { TasksModule } from './modules/tasks/tasks.module'
 import { TodoModule } from './modules/todo/todo.module'
 import { ToolsModule } from './modules/tools/tools.module'
+import { WalletTransactionModule } from './modules/wallet-transaction/wallet-transaction.module'
 import { DatabaseModule } from './shared/database/database.module'
 
 import { SocketModule } from './socket/socket.module'
@@ -74,6 +75,7 @@ import { SocketModule } from './socket/socket.module'
     TodoModule,
     ServersModule,
     ExchangeWalletsModule,
+    WalletTransactionModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
