@@ -2,46 +2,56 @@ import { Tag } from 'ant-design-vue';
 import type { TableColumn } from '@/components/core/dynamic-table';
 import { formatToDateTime } from '@/utils/dateUtil';
 
-export const columns: TableColumn[] = [
+export const transactionColumns: TableColumn[] = [
   {
     title: '交易签名',
     dataIndex: 'transactionSignature',
+    ellipsis: true,
   },
   {
     title: '代币地址',
     dataIndex: 'ca',
+    ellipsis: true,
   },
   {
     title: '钱包地址',
     dataIndex: 'walletAddress',
+    ellipsis: true,
   },
   {
     title: '购买金额(SOL)',
     dataIndex: 'purchaseAmount',
-    searchField: 'minPurchaseAmount',
+    width: 100,
   },
   {
     title: '代币市值',
     dataIndex: 'tokenMarketValue',
-    searchField: 'minTokenMarketValue',
+    width: 150,
   },
   {
     title: '最高市值',
     dataIndex: 'tokenMarketValueHeight',
+    width: 150,
     hideInTable: true,
     hideInSearch: true,
-    searchField: 'minTokenMarketValueHeight',
   },
   {
     title: '黑盘比例',
     dataIndex: 'blackMarketRatio',
+    width: 100,
     customRender: ({ text }) => {
-      return `${text * 100}%`;
+      return `${(text * 100).toFixed(2)}%`;
+    },
+    formItemProps: {
+      componentProps: {
+        placeholder: '输入比例,如:0.1 0.2 0.3 向上匹配查找',
+      },
     },
   },
   {
     title: '播报类型',
     dataIndex: 'type',
+    width: 150,
     customRender: ({ text }) => {
       switch (text) {
         case 1:
@@ -87,10 +97,12 @@ export const columns: TableColumn[] = [
   {
     title: '代币符号',
     dataIndex: 'tokenSymbol',
+    width: 100,
   },
   {
     title: '发送交易',
     dataIndex: 'isSentToExchange',
+    width: 100,
     customRender: ({ text }) => {
       if (text == 0) {
         return <Tag color="red">否</Tag>;
@@ -121,6 +133,7 @@ export const columns: TableColumn[] = [
   {
     title: '盈利金额',
     dataIndex: 'profit',
+    width: 100,
     customRender: ({ text }) => {
       if (text != null) {
         if (text == 0) {
@@ -136,7 +149,6 @@ export const columns: TableColumn[] = [
         return <span>--</span>;
       }
     },
-    searchField: 'minProfit',
   },
   {
     title: '创建时间',
@@ -145,9 +157,11 @@ export const columns: TableColumn[] = [
     customRender({ text }) {
       return text ? formatToDateTime(text) : '-';
     },
+    hideInTable: true,
   },
   {
     title: '更新时间',
+    width: 150,
     dataIndex: 'updatedAt',
     hideInSearch: true,
     customRender({ text }) {

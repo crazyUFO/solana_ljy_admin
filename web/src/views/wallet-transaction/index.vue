@@ -9,19 +9,22 @@
     @toggle-advanced="toggleAdvanced"
   >
     <template #toolbar>
-      <a-button type="primary" @click="defaultHeader"> 导出：默认头部 </a-button>
-      <a-button type="primary" @click="customHeader"> 导出：自定义头部 </a-button>
+      <!-- <a-button type="primary" @click="defaultHeader"> 导出：默认头部 </a-button> -->
+      <a-button type="primary" @click="customHeader"> 导出表格 </a-button>
     </template>
   </DynamicTable>
 </template>
 
 <script lang="ts" setup>
-  import { columns } from './columns';
+  import { h, ref } from 'vue';
+  import { Spin } from 'ant-design-vue';
+  import { transactionColumns, type TableListItem, type TableColumnItem } from './columns';
   import { useTable } from '@/components/core/dynamic-table';
   import { jsonToSheetXlsx } from '@/components/basic/excel';
 
   import { getTransactionList } from '@/api/wallet-transaction/manage';
   import { formatToDateTime } from '@/utils/dateUtil';
+  import { useModal } from '@/hooks/useModal/';
 
   const [DynamicTable, dynamicTableInstance] = useTable();
   function defaultHeader() {
@@ -31,6 +34,38 @@
       filename: '使用key作为默认头部.xlsx',
     });
   }
+  const [fnModal] = useModal();
+  /**
+   * @description 打开操作用户弹窗
+   */
+  const openKlineModal = async (record: Partial<TableListItem> = {}) => {
+    const loading = ref(true); // 初始化 loading 状态为 true
+
+    const hideLoading = () => {
+      loading.value = false; // 加载完成后隐藏 loading
+    };
+
+    await fnModal.show({
+      title: `${record.ca}`,
+      width: 1100,
+      footer: null, // 隐藏底部按钮
+      content: () =>
+        h(
+          Spin,
+          { spinning: loading.value, tip: 'Loading...' }, // Spin 的属性
+          () =>
+            h('iframe', {
+              src: `https://www.gmgn.cc/kline/sol/${record.ca}?theme=light`, // 替换为您的外链地址
+              style: {
+                width: '100%',
+                height: '400px',
+                border: 'none',
+              },
+              onload: hideLoading, // iframe 加载完成后隐藏 loading
+            }),
+        ),
+    });
+  };
 
   // 自定义头部
   function customHeader() {
@@ -93,6 +128,30 @@
       // ]);
     }
   };
+  const columns: TableColumnItem[] = [
+    ...transactionColumns,
+    {
+      title: '操作',
+      dataIndex: 'ACTION',
+      width: 250,
+      actions: ({ record }) => [
+        {
+          label: 'GMGN',
+          onClick: () => window.open(`https://gmgn.ai/sol/address/${record.walletAddress}`),
+        },
+        {
+          label: 'SOLSCAN',
+          onClick: () => window.open(`https://solscan.io/account/${record.walletAddress}`),
+        },
+        {
+          label: 'KLINE',
+          onClick: () => {
+            openKlineModal(record);
+          },
+        },
+      ],
+    },
+  ];
 </script>
 
 <style lang="less" scoped></style>

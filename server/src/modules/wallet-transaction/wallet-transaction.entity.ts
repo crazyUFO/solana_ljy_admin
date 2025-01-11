@@ -34,7 +34,7 @@ export class WalletTransaction {
   type: number
 
   // 交易签名
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ type: 'varchar', length: 255 })
   transactionSignature: string
 
   // 代币符号

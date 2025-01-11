@@ -28,10 +28,10 @@ export class WalletTransactionService {
   }
 
   // 根据交易签名更新字段
-  async updateTransaction(transactionSignature: string, fields: Record<string, any>): Promise<string> {
+  async updateTransaction(transactionSignature: string, type: number, fields: Record<string, any>): Promise<string> {
     // 查找对应的交易记录
     const transaction = await this.walletTransactionRepository.findOne({
-      where: { transactionSignature },
+      where: { transactionSignature, type },
     })
 
     if (!transaction) {
@@ -60,7 +60,6 @@ export class WalletTransactionService {
     return 'Transaction updated successfully'
   }
 
-  // 根据传入的查询条件获取交易记录
   async getTransactions(queryConditions: Record<string, any>): Promise<WalletTransaction[]> {
     const queryBuilder = this.walletTransactionRepository.createQueryBuilder('transaction')
 
@@ -77,39 +76,63 @@ export class WalletTransactionService {
       })
     }
 
+    if (queryConditions.ca) {
+      queryBuilder.andWhere('transaction.ca = :ca', {
+        ca: queryConditions.ca,
+      })
+    }
+
     if (queryConditions.tokenSymbol) {
       queryBuilder.andWhere('transaction.tokenSymbol = :tokenSymbol', {
         tokenSymbol: queryConditions.tokenSymbol,
       })
     }
 
+    // 处理范围查询字段
     if (queryConditions.purchaseAmount) {
-      queryBuilder.andWhere('transaction.purchaseAmount >= :minPurchaseAmount', {
-        minPurchaseAmount: queryConditions.purchaseAmount,
+      const { min, max } = queryConditions.purchaseAmount
+      queryBuilder.andWhere('transaction.purchaseAmount >= :minPurchaseAmount AND transaction.purchaseAmount <= :maxPurchaseAmount', {
+        minPurchaseAmount: min,
+        maxPurchaseAmount: max,
       })
     }
 
     if (queryConditions.tokenMarketValueHeight) {
-      queryBuilder.andWhere('transaction.tokenMarketValueHeight >= :minTokenMarketValueHeight', {
-        minTokenMarketValueHeight: queryConditions.tokenMarketValueHeight,
+      const { min, max } = queryConditions.tokenMarketValueHeight
+      queryBuilder.andWhere('transaction.tokenMarketValueHeight >= :minTokenMarketValueHeight AND transaction.tokenMarketValueHeight <= :maxTokenMarketValueHeight', {
+        minTokenMarketValueHeight: min,
+        maxTokenMarketValueHeight: max,
       })
     }
 
     if (queryConditions.tokenMarketValue) {
-      queryBuilder.andWhere('transaction.tokenMarketValue >= :minTokenMarketValue', {
-        minTokenMarketValue: queryConditions.tokenMarketValue,
-      })
-    }
-
-    if (queryConditions.type) {
-      queryBuilder.andWhere('transaction.type = :type', {
-        type: queryConditions.type,
+      const { min, max } = queryConditions.tokenMarketValue
+      queryBuilder.andWhere('transaction.tokenMarketValue >= :minTokenMarketValue AND transaction.tokenMarketValue <= :maxTokenMarketValue', {
+        minTokenMarketValue: min,
+        maxTokenMarketValue: max,
       })
     }
 
     if (queryConditions.blackMarketRatio) {
-      queryBuilder.andWhere('transaction.blackMarketRatio >= :blackMarketRatio', {
-        blackMarketRatio: queryConditions.blackMarketRatio,
+      const { min, max } = queryConditions.blackMarketRatio
+      queryBuilder.andWhere('transaction.blackMarketRatio >= :minBlackMarketRatio AND transaction.blackMarketRatio <= :maxBlackMarketRatio', {
+        minBlackMarketRatio: min,
+        maxBlackMarketRatio: max,
+      })
+    }
+
+    if (queryConditions.profit) {
+      const { min, max } = queryConditions.profit
+      queryBuilder.andWhere('transaction.profit >= :minProfit AND transaction.profit <= :maxProfit', {
+        minProfit: min,
+        maxProfit: max,
+      })
+    }
+
+    // 处理其他非范围查询字段
+    if (queryConditions.type) {
+      queryBuilder.andWhere('transaction.type = :type', {
+        type: queryConditions.type,
       })
     }
 
@@ -118,12 +141,8 @@ export class WalletTransactionService {
         isSentToExchange: queryConditions.isSentToExchange,
       })
     }
-    if (queryConditions.profit) {
-      queryBuilder.andWhere('transaction.profit >= :minProfit', {
-        minProfit: queryConditions.profit,
-      })
-    }
-    // 按 createdAt 字段倒序排序（最新的记录排在前面）
+
+    // 按 updatedAt 字段倒序排序（最新的记录排在前面）
     queryBuilder.orderBy('transaction.updatedAt', 'DESC')
 
     // 执行查询
