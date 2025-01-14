@@ -1,19 +1,40 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { ExchangeWallet } from '../exchange/exchange-wallet.entity'
 import { WalletTransaction } from './wallet-transaction.entity'
 
 @Injectable()
 export class WalletTransactionService {
   constructor(
     @InjectRepository(WalletTransaction)
-    private walletTransactionRepository: Repository<WalletTransaction>,
+    private walletTransactionRepository: Repository<WalletTransaction>, // WalletTransaction 的 Repository
+
+    @InjectRepository(ExchangeWallet)
+    private exchangeWalletRepository: Repository<ExchangeWallet>, // ExchangeWallet 的 Repository
   ) {}
 
   // 创建交易记录
   async createTransaction(transactionData: Partial<WalletTransaction>): Promise<WalletTransaction> {
-    const transaction = this.walletTransactionRepository.create(transactionData)
-    return await this.walletTransactionRepository.save(transaction)
+    // 查找 walletAddress 是否在黑名单中
+    const blacklistRecord = await this.exchangeWalletRepository.findOne({
+      where: { walletAddress: transactionData.walletAddress },
+    })
+
+    if (blacklistRecord) {
+      // 如果找到了黑名单记录，关联 blacklist
+      transactionData.blacklist = blacklistRecord
+    }
+    else {
+      // 如果没有找到，设置 blacklist 为 null
+      transactionData.blacklist = null
+    }
+
+    // 创建并保存交易记录
+    const newTransaction = this.walletTransactionRepository.create(transactionData)
+
+    // 保存交易记录
+    return this.walletTransactionRepository.save(newTransaction)
   }
 
   // 获取所有交易记录

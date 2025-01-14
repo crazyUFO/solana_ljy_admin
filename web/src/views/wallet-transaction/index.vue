@@ -1,28 +1,65 @@
 <template>
-  <DynamicTable
-    ref="dynamicTableRef"
-    size="small"
-    bordered
-    :data-request="getTransactionList"
-    :columns="columns"
-    row-key="heroid"
-    @toggle-advanced="toggleAdvanced"
-  >
-    <template #toolbar>
-      <!-- <a-button type="primary" @click="defaultHeader"> 导出：默认头部 </a-button> -->
-      <a-button type="primary" @click="customHeader"> 导出表格 </a-button>
-    </template>
-  </DynamicTable>
+  <div>
+    <DynamicTable
+      ref="dynamicTableRef"
+      size="small"
+      bordered
+      :data-request="getTransactionList"
+      :columns="columns"
+      row-key="dataIndex"
+      expandRowByClick
+      :scroll="{ x: 3000 }"
+      @toggle-advanced="toggleAdvanced"
+      @resizeColumn="handleResizeColumn"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.key === 'walletAddress'">
+          <span>
+            {{ record.walletAddress }}
+          </span>
+          <a-divider type="vertical" />
+          <a target="_blanck" :href="`https://gmgn.ai/sol/address/${record.walletAddress}`">GMGN</a>
+          <a-divider type="vertical" />
+          <a target="_blanck" :href="`https://solscan.io/account/${record.walletAddress}`"
+            >SOLSCAN</a
+          >
+          <a-divider type="vertical" />
+          <a @click="addToBlackList(record)">BLACKLIST</a>
+        </template>
+        <template v-if="column.key === 'ca'">
+          <span>
+            {{ record.ca }}
+          </span>
+          <a-divider type="vertical" />
+          <a @click="openKlineModal(record)">KLINE</a>
+        </template>
+        <template v-if="column.key === 'transactionSignature'">
+          <span>
+            {{ record.transactionSignature }}
+          </span>
+          <a-divider type="vertical" />
+          <a target="_blanck" :href="`https://solscan.io/tx/${record.transactionSignature}`"
+            >CHECK</a
+          >
+        </template>
+      </template>
+      <template #toolbar>
+        <!-- <a-button type="primary" @click="defaultHeader"> 导出：默认头部 </a-button> -->
+        <a-button type="primary" @click="customHeader"> 导出表格 </a-button>
+      </template>
+    </DynamicTable>
+  </div>
 </template>
 
 <script lang="ts" setup>
   import { h, ref } from 'vue';
-  import { Spin } from 'ant-design-vue';
+  import { Spin, Modal, message } from 'ant-design-vue';
   import { transactionColumns, type TableListItem, type TableColumnItem } from './columns';
   import { useTable } from '@/components/core/dynamic-table';
   import { jsonToSheetXlsx } from '@/components/basic/excel';
 
   import { getTransactionList } from '@/api/wallet-transaction/manage';
+  import { createWallet } from '@/api/exchange/manage';
   import { formatToDateTime } from '@/utils/dateUtil';
   import { useModal } from '@/hooks/useModal/';
 
@@ -67,6 +104,9 @@
     });
   };
 
+  function handleResizeColumn(w, col) {
+    col.width = w;
+  }
   // 自定义头部
   function customHeader() {
     const typeString = ['', '老鲸鱼钱包', '老鲸鱼暴击', '老钱包买单', '老鲸鱼转账'];
@@ -128,29 +168,50 @@
       // ]);
     }
   };
+  const addToBlackList = (record) => {
+    Modal.confirm({
+      title: '警告', // 标题
+      content: '是否将此钱包加入到黑名单', // 内容
+      onOk: async () => {
+        let params = {
+          walletAddress: record.walletAddress,
+          label: '网页操作',
+          type: 2,
+        };
+        await createWallet(params);
+        message.success({
+          content: '操作成功',
+        });
+      },
+      onCancel() {
+        console.log('Cancelled'); // 用户点击取消时执行的回调
+      },
+    });
+  };
   const columns: TableColumnItem[] = [
     ...transactionColumns,
-    {
-      title: '操作',
-      dataIndex: 'ACTION',
-      width: 250,
-      actions: ({ record }) => [
-        {
-          label: 'GMGN',
-          onClick: () => window.open(`https://gmgn.ai/sol/address/${record.walletAddress}`),
-        },
-        {
-          label: 'SOLSCAN',
-          onClick: () => window.open(`https://solscan.io/account/${record.walletAddress}`),
-        },
-        {
-          label: 'KLINE',
-          onClick: () => {
-            openKlineModal(record);
-          },
-        },
-      ],
-    },
+    // {
+    //   title: '操作',
+    //   dataIndex: 'ACTION',
+    //   fixed: 'right',
+    //   width: 150,
+    //   actions: ({ record }) => [
+    //     {
+    //       label: 'GMGN',
+    //       onClick: () => window.open(`https://gmgn.ai/sol/address/${record.walletAddress}`),
+    //     },
+    //     {
+    //       label: 'SOLSCAN',
+    //       onClick: () => window.open(`https://solscan.io/account/${record.walletAddress}`),
+    //     },
+    //     {
+    //       label: 'KLINE',
+    //       onClick: () => {
+    //         openKlineModal(record);
+    //       },
+    //     },
+    //   ],
+    // },
   ];
 </script>
 

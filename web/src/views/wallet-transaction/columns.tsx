@@ -7,26 +7,48 @@ export const transactionColumns: TableColumn[] = [
     title: '交易签名',
     dataIndex: 'transactionSignature',
     ellipsis: true,
+    resizable: true,
+    width: 100,
+    minWidth: 100,
+    maxWidth: 700,
   },
   {
     title: '代币地址',
     dataIndex: 'ca',
     ellipsis: true,
+    resizable: true,
+    width: 100,
+    minWidth: 100,
+    maxWidth: 500,
   },
   {
     title: '钱包地址',
     dataIndex: 'walletAddress',
     ellipsis: true,
+    resizable: true,
+    width: 100,
+    minWidth: 100,
+    maxWidth: 500,
   },
   {
     title: '购买金额(SOL)',
     dataIndex: 'purchaseAmount',
     width: 100,
+    formItemProps: {
+      componentProps: {
+        placeholder: '输入范围,如0.6-1.1,输入单个数字视为下限',
+      },
+    },
   },
   {
     title: '代币市值',
     dataIndex: 'tokenMarketValue',
     width: 150,
+    formItemProps: {
+      componentProps: {
+        placeholder: '输入范围,如10000-30000,输入单个数字视为下限',
+      },
+    },
   },
   {
     title: '最高市值',
@@ -44,7 +66,7 @@ export const transactionColumns: TableColumn[] = [
     },
     formItemProps: {
       componentProps: {
-        placeholder: '输入比例,如:0.1 0.2 0.3 向上匹配查找',
+        placeholder: '输入范围,如0.1-0.6,输入单个数字视为下限',
       },
     },
   },
@@ -131,6 +153,30 @@ export const transactionColumns: TableColumn[] = [
     },
   },
   {
+    title: '调用交易端',
+    dataIndex: 'failureReason',
+    width: 100,
+    hideInSearch: true,
+    ellipsis: true,
+    resizable: true,
+    minWidth: 100,
+    maxWidth: 500,
+  },
+  {
+    title: '是否拉黑',
+    dataIndex: 'blacklistId',
+    hideInSearch: true,
+    hideInTable: true,
+    width: 100,
+    customRender: ({ text }) => {
+      if (text) {
+        return <Tag color="red">是</Tag>;
+      } else {
+        return <Tag color="green">否</Tag>;
+      }
+    },
+  },
+  {
     title: '盈利金额',
     dataIndex: 'profit',
     width: 100,
@@ -149,15 +195,20 @@ export const transactionColumns: TableColumn[] = [
         return <span>--</span>;
       }
     },
+    formItemProps: {
+      componentProps: {
+        placeholder: '输入范围,如400-700,输入单个数字视为下限',
+      },
+    },
   },
   {
     title: '创建时间',
     dataIndex: 'createdAt',
     hideInSearch: true,
+    hideInTable: true,
     customRender({ text }) {
       return text ? formatToDateTime(text) : '-';
     },
-    hideInTable: true,
   },
   {
     title: '更新时间',

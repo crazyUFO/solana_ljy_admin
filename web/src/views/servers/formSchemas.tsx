@@ -119,7 +119,7 @@ export const serversettingSchemas: FormSchema[] = [
   },
   {
     field: 'CALL_BACK_URL',
-    component: 'Input',
+    component: 'InputTextArea',
     label: '回调地址',
     helpMessage: '通知交易端的回调地址',
     rules: [{ type: 'string' }],

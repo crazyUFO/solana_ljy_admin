@@ -8,7 +8,7 @@ export class ExchangeWalletsService {
   constructor(
     @InjectRepository(ExchangeWallet)
     private readonly exchangeWalletRepository: Repository<ExchangeWallet>,
-  ) {}
+  ) { }
 
   // 创建钱包并确保钱包地址唯一
   async create(createExchangeWalletDto: Partial<ExchangeWallet>): Promise<ExchangeWallet> {
@@ -38,6 +38,23 @@ export class ExchangeWalletsService {
   // 获取所有钱包
   async findAll(): Promise<ExchangeWallet[]> {
     return this.exchangeWalletRepository.find()
+  }
+
+  // 条件查询
+  async getWallets(queryConditions: Record<string, any>): Promise<ExchangeWallet[]> {
+    const queryBuilder = this.exchangeWalletRepository.createQueryBuilder('transaction')
+
+    // 处理其他非范围查询字段
+    if (queryConditions.type) {
+      queryBuilder.andWhere('transaction.type = :type', {
+        type: queryConditions.type,
+      })
+    }
+    // 按 updatedAt 字段倒序排序（最新的记录排在前面）
+    queryBuilder.orderBy('transaction.updatedAt', 'DESC')
+
+    // 执行查询
+    return queryBuilder.getMany()
   }
 
   // 获取单个钱包

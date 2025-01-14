@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { ExchangeWallet } from '../exchange/exchange-wallet.entity'
 
 @Entity('wallet_transactions')
 export class WalletTransaction {
@@ -51,6 +52,17 @@ export class WalletTransaction {
   // 盈利金额（只在交易已发送时有效）
   @Column({ type: 'decimal', precision: 18, scale: 2, nullable: true })
   profit: number | null
+
+  // 未发送到交易所的原因
+  @Column({ type: 'text', nullable: true })
+  failureReason: string | null // 使用 TEXT 类型来存储较长的失败原因
+
+  @ManyToOne(() => ExchangeWallet, exchangeWallet => exchangeWallet.walletAddress, { nullable: true, cascade: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'blacklistId' })
+  blacklist: ExchangeWallet // 关联的黑名单钱包
+
+  @Column({ type: 'int', nullable: true })
+  blacklistId: number | null // 外键字段，关联 `ExchangeWallet` 表
 
   @CreateDateColumn()
   createdAt: Date // 钱包地址创建时间

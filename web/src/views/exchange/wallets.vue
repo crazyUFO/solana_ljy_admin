@@ -55,6 +55,7 @@
           let params = {
             walletAddress: values.walletAddress,
             label: values.label,
+            type:values.type
           };
           if (record.id) {
             await updateWallet({ id: record.id, data: params });
@@ -72,10 +73,10 @@
     });
 
     if (record.id) {
-      console.log(record);
       formRef?.setFieldsValue({
         walletAddress: record.walletAddress,
         label: record.label,
+        type: record.type,
       });
     }
   };
