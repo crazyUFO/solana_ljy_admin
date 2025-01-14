@@ -153,7 +153,7 @@ export const transactionColumns: TableColumn[] = [
     },
   },
   {
-    title: '调用交易端',
+    title: '回调消息',
     dataIndex: 'failureReason',
     width: 100,
     hideInSearch: true,
