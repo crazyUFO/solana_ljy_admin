@@ -1,4 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Post, Query } from '@nestjs/common'
+import { SkipThrottle } from '@nestjs/throttler'
 import { Public } from '../auth/decorators/public.decorator'
 import { WalletTransaction } from './wallet-transaction.entity'
 import { WalletTransactionService } from './wallet-transaction.service'
@@ -6,7 +7,7 @@ import { WalletTransactionService } from './wallet-transaction.service'
 @Controller('wallet-transactions')
 @Public()
 export class WalletTransactionController {
-  constructor(private readonly walletTransactionService: WalletTransactionService) {}
+  constructor(private readonly walletTransactionService: WalletTransactionService) { }
 
   // 创建交易记录
   @Post()
@@ -80,12 +81,10 @@ export class WalletTransactionController {
     @Body() body: {
       transactionSignature: string
       type: number
-      tokenMarketValueHeight?: number
-      blackMarketRatio?: number
-      profit?: number
+      profit: number
     },
   ) {
-    const { transactionSignature, type, tokenMarketValueHeight, blackMarketRatio, profit } = body
+    const { transactionSignature, type, profit } = body
 
     // 参数验证
     if (!transactionSignature) {
@@ -95,18 +94,54 @@ export class WalletTransactionController {
     if (!type) {
       throw new BadRequestException('Missing required type')
     }
+    // 参数验证
+    if (!profit) {
+      throw new BadRequestException('Missing required profit')
+    }
 
     // 调用服务处理回调
     try {
       const result = await this.walletTransactionService.updateTransaction(
         transactionSignature,
         type,
-        { tokenMarketValueHeight, blackMarketRatio, profit },
+        profit,
       )
-      return { message: result }
+      return result
     }
     catch (error) {
       throw new BadRequestException('Failed to update transaction')
+    }
+  }
+
+  @Post('updateTokenMarketValueHeight')
+  @SkipThrottle() // 跳过限流
+  async updateTransactionMarketValue(
+    @Body() body: {
+      ca: string
+      tokenMarketValueHeight: number
+    },
+  ) {
+    const { ca, tokenMarketValueHeight } = body
+
+    // 参数验证
+    if (!ca) {
+      throw new BadRequestException('Missing required ca')
+    }
+    // 参数验证
+    if (!tokenMarketValueHeight) {
+      throw new BadRequestException('Missing required tokenMarketValueHeight')
+    }
+
+    // 调用服务处理回调
+    try {
+      const result = await this.walletTransactionService.updateTransactionMarketValue(
+        ca,
+        tokenMarketValueHeight,
+      )
+      return result
+    }
+    catch (error) {
+      throw new BadRequestException(error)
     }
   }
 }

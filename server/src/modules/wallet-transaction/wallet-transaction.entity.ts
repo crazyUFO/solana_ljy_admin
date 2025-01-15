@@ -69,4 +69,24 @@ export class WalletTransaction {
 
   @UpdateDateColumn()
   updatedAt: Date // 钱包地址最后更新时间
+
+  // 代币创建时间
+  @Column({ type: 'timestamp', nullable: true, precision: 3 })
+  tokenCreatedAt: Date | null // 代币的创建时间
+
+  // 发送到交易所时间
+  @Column({ type: 'timestamp', nullable: true, precision: 3 })
+  buyOderAt: Date | null // 用户买入该订单的时间
+
+  // 发送到交易所时间
+  @Column({ type: 'timestamp', nullable: true, precision: 3 })
+  sentToExchangeAt: Date | null // 记录发送到交易所的时间
+
+  // 发送到播报时间
+  @Column({ type: 'timestamp', nullable: true, precision: 3 })
+  sentToBroadcastAt: Date | null // 记录发送到播报的时间
+
+  // 买入价格（单个代币的价格）
+  @Column({ type: 'decimal', precision: 24, scale: 18, nullable: true })
+  buyPrice: number | null // 记录购买时的单个代币价格
 }

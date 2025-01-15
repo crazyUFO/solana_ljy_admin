@@ -8,7 +8,7 @@ export const transactionColumns: TableColumn[] = [
     dataIndex: 'transactionSignature',
     ellipsis: true,
     resizable: true,
-    width: 100,
+    width: 200,
     minWidth: 100,
     maxWidth: 700,
   },
@@ -17,7 +17,7 @@ export const transactionColumns: TableColumn[] = [
     dataIndex: 'ca',
     ellipsis: true,
     resizable: true,
-    width: 100,
+    width: 200,
     minWidth: 100,
     maxWidth: 500,
   },
@@ -26,7 +26,7 @@ export const transactionColumns: TableColumn[] = [
     dataIndex: 'walletAddress',
     ellipsis: true,
     resizable: true,
-    width: 100,
+    width: 200,
     minWidth: 100,
     maxWidth: 500,
   },
@@ -192,7 +192,7 @@ export const transactionColumns: TableColumn[] = [
           return <span style="color:red;">{text}</span>;
         }
       } else {
-        return <span>--</span>;
+        return <span>-</span>;
       }
     },
     formItemProps: {
@@ -202,8 +202,59 @@ export const transactionColumns: TableColumn[] = [
     },
   },
   {
+    title: '购买单价(usd)',
+    dataIndex: 'buyPrice',
+    width: 100,
+    customRender: ({ text }) => {
+      if (text != null) {
+        if (text) {
+          return <span>{(text * 1).toFixed(11)}</span>;
+        }
+      } else {
+        return <span>-</span>;
+      }
+    },
+  },
+  {
+    title: '代币创建',
+    dataIndex: 'tokenCreatedAt',
+    hideInSearch: true,
+    width: 100,
+    customRender({ text }) {
+      return text ? formatToDateTime(text) : '-';
+    },
+  },
+  {
+    title: '订单买入',
+    dataIndex: 'buyOderAt',
+    width: 100,
+    hideInSearch: true,
+    customRender({ text }) {
+      return text ? formatToDateTime(text) : '-';
+    },
+  },
+  {
+    title: '发送交易',
+    dataIndex: 'sentToExchangeAt',
+    width: 100,
+    hideInSearch: true,
+    customRender({ text }) {
+      return text ? formatToDateTime(text) : '-';
+    },
+  },
+  {
+    title: '发送播报',
+    dataIndex: 'sentToBroadcastAt',
+    width: 100,
+    hideInSearch: true,
+    customRender({ text }) {
+      return text ? formatToDateTime(text) : '-';
+    },
+  },
+  {
     title: '创建时间',
     dataIndex: 'createdAt',
+    width: 100,
     hideInSearch: true,
     hideInTable: true,
     customRender({ text }) {
@@ -212,9 +263,9 @@ export const transactionColumns: TableColumn[] = [
   },
   {
     title: '更新时间',
-    width: 150,
     dataIndex: 'updatedAt',
     hideInSearch: true,
+    hideInTable: true,
     customRender({ text }) {
       return text ? formatToDateTime(text) : '-';
     },

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { ExchangeWallet } from '../exchange/exchange-wallet.entity'
@@ -12,7 +12,7 @@ export class WalletTransactionService {
 
     @InjectRepository(ExchangeWallet)
     private exchangeWalletRepository: Repository<ExchangeWallet>, // ExchangeWallet 的 Repository
-  ) {}
+  ) { }
 
   // 创建交易记录
   async createTransaction(transactionData: Partial<WalletTransaction>): Promise<WalletTransaction> {
@@ -48,8 +48,8 @@ export class WalletTransactionService {
     return queryBuilder.getMany()
   }
 
-  // 根据交易签名更新字段
-  async updateTransaction(transactionSignature: string, type: number, fields: Record<string, any>): Promise<string> {
+  // 根据交易签名更新盈利金额
+  async updateTransaction(transactionSignature: string, type: number, profit: number): Promise<string> {
     // 查找对应的交易记录
     const transaction = await this.walletTransactionRepository.findOne({
       where: { transactionSignature, type },
@@ -59,26 +59,35 @@ export class WalletTransactionService {
       throw new NotFoundException('Transaction not found')
     }
 
-    // 禁止更新某些敏感字段（例如 transactionSignature）
-    if ('transactionSignature' in fields) {
-      throw new BadRequestException('Cannot update transaction signature')
-    }
-
-    // 更新其他字段
-    Object.keys(fields).forEach((field) => {
-      // 如果字段在 WalletTransaction 实体中，进行更新
-      if (field in transaction) {
-        transaction[field] = fields[field]
-      }
-      else {
-        throw new BadRequestException(`Invalid field: ${field}`)
-      }
-    })
+    // 更新字段值
+    transaction.profit = profit
 
     // 保存更新后的交易记录
     await this.walletTransactionRepository.save(transaction)
 
     return 'Transaction updated successfully'
+  }
+
+  // 根据交易签名更新最高市值
+  async updateTransactionMarketValue(ca: string, tokenMarketValueHeight: number): Promise<number> {
+    // 查找对应的交易记录
+    const transactions = await this.walletTransactionRepository.find({
+      where: { ca },
+    })
+    if (!transactions.length) {
+      throw new NotFoundException('ca not found')
+    }
+    let updatedCount = 0 // 用来记录更新的交易数量
+    // 遍历每一条交易记录，更新市场价值相关字段
+    for (const transaction of transactions) {
+      // 更新交易记录的字段
+      transaction.tokenMarketValueHeight = tokenMarketValueHeight
+      // 保存更新后的交易记录
+      updatedCount++
+      await this.walletTransactionRepository.save(transaction)
+    }
+
+    return updatedCount
   }
 
   async getTransactions(queryConditions: Record<string, any>): Promise<WalletTransaction[]> {

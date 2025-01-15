@@ -4,10 +4,9 @@
       ref="dynamicTableRef"
       size="small"
       bordered
-      :data-request="getTransactionList"
+      :data-request="loadTableData"
       :columns="columns"
       row-key="dataIndex"
-      expandRowByClick
       :scroll="{ x: 3000 }"
       @toggle-advanced="toggleAdvanced"
       @resizeColumn="handleResizeColumn"
@@ -27,20 +26,12 @@
           <a @click="addToBlackList(record)">BLACKLIST</a>
         </template>
         <template v-if="column.key === 'ca'">
-          <span>
-            {{ record.ca }}
-          </span>
-          <a-divider type="vertical" />
-          <a @click="openKlineModal(record)">KLINE</a>
+          <a @click="openKlineModal(record)"> {{ record.ca }}</a>
         </template>
         <template v-if="column.key === 'transactionSignature'">
-          <span>
-            {{ record.transactionSignature }}
-          </span>
-          <a-divider type="vertical" />
-          <a target="_blanck" :href="`https://solscan.io/tx/${record.transactionSignature}`"
-            >CHECK</a
-          >
+          <a target="_blanck" :href="`https://solscan.io/tx/${record.transactionSignature}`">{{
+            record.transactionSignature
+          }}</a>
         </template>
       </template>
       <template #toolbar>
@@ -55,6 +46,7 @@
   import { h, ref } from 'vue';
   import { Spin, Modal, message } from 'ant-design-vue';
   import { transactionColumns, type TableListItem, type TableColumnItem } from './columns';
+  import type { LoadDataParams } from '@/components/core/dynamic-table';
   import { useTable } from '@/components/core/dynamic-table';
   import { jsonToSheetXlsx } from '@/components/basic/excel';
 
@@ -145,7 +137,12 @@
       filename: '播报数据.xlsx',
     });
   }
-
+  const loadTableData = async (params: LoadDataParams) => {
+    const data = await getTransactionList({
+      ...params,
+    });
+    return data;
+  };
   // 展开搜索表单时更新英雄皮肤选项值
   const toggleAdvanced = (e) => {
     if (e) {
