@@ -54,7 +54,6 @@ export const transactionColumns: TableColumn[] = [
     title: '最高市值',
     dataIndex: 'tokenMarketValueHeight',
     width: 150,
-    hideInTable: true,
     hideInSearch: true,
   },
   {
