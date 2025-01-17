@@ -11,6 +11,11 @@ export const transactionColumns: TableColumn[] = [
     width: 200,
     minWidth: 100,
     maxWidth: 700,
+    formItemProps: {
+      componentProps: {
+        placeholder: '支持模糊查找',
+      },
+    },
   },
   {
     title: '代币地址',
@@ -20,6 +25,11 @@ export const transactionColumns: TableColumn[] = [
     width: 200,
     minWidth: 100,
     maxWidth: 500,
+    formItemProps: {
+      componentProps: {
+        placeholder: '支持模糊查找',
+      },
+    },
   },
   {
     title: '钱包地址',
@@ -29,6 +39,11 @@ export const transactionColumns: TableColumn[] = [
     width: 200,
     minWidth: 100,
     maxWidth: 500,
+    formItemProps: {
+      componentProps: {
+        placeholder: '支持模糊查找',
+      },
+    },
   },
   {
     title: '购买金额(SOL)',
@@ -54,7 +69,12 @@ export const transactionColumns: TableColumn[] = [
     title: '最高市值',
     dataIndex: 'tokenMarketValueHeight',
     width: 150,
-    hideInSearch: true,
+    sorter: true,
+    formItemProps: {
+      componentProps: {
+        placeholder: '输入范围,如10000-30000,输入单个数字视为下限',
+      },
+    },
   },
   {
     title: '黑盘比例',
@@ -204,6 +224,7 @@ export const transactionColumns: TableColumn[] = [
     title: '购买单价(usd)',
     dataIndex: 'buyPrice',
     width: 100,
+    hideInSearch: true,
     customRender: ({ text }) => {
       if (text != null) {
         if (text) {

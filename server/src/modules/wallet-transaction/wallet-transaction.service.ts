@@ -1,8 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Equal, Like, Repository } from 'typeorm'
+import { paginate } from '~/helper/paginate'
 import { ExchangeWallet } from '../exchange/exchange-wallet.entity'
 import { WalletTransaction } from './wallet-transaction.entity'
+import { TransactionQueryDto } from './wallet-transaction-query.dto'
 
 @Injectable()
 export class WalletTransactionService {
@@ -38,14 +40,82 @@ export class WalletTransactionService {
   }
 
   // 获取所有交易记录
-  async getAllTransactions(): Promise<WalletTransaction[]> {
-    const queryBuilder = this.walletTransactionRepository.createQueryBuilder('transaction')
+  async getAllTransactions(
+    query: TransactionQueryDto,
+  ) {
+    const {
+      page,
+      pageSize,
+      transactionSignature,
+      walletAddress,
+      ca,
+      tokenSymbol,
+      purchaseAmount,
+      tokenMarketValueHeight,
+      tokenMarketValue,
+      type,
+      blackMarketRatio,
+      isSentToExchange,
+      profit,
+      field,
+      order,
+    } = query
+    console.log(query)
 
-    // 按 createdAt 字段倒序排序（最新的记录排在前面）
-    queryBuilder.orderBy('transaction.updatedAt', 'DESC')
+    const queryBuilder = await this.walletTransactionRepository.createQueryBuilder('transaction')
+      .orderBy('transaction.createdAt', 'DESC')
 
-    // 执行查询
-    return queryBuilder.getMany()
+    queryBuilder.where({
+      ...(transactionSignature && { transactionSignature: Like(`%${transactionSignature}%`) }),
+      ...(walletAddress && { walletAddress: Like(`%${walletAddress}%`) }),
+      ...(ca && { ca: Like(`%${ca}%`) }),
+      ...(tokenSymbol && { tokenSymbol: Like(`%${tokenSymbol}%`) }),
+      ...(type && { type: Equal(type) }),
+      ...(isSentToExchange && { isSentToExchange: Equal(isSentToExchange) }),
+    })
+    if (purchaseAmount) {
+      const { min, max } = this.parseRange(purchaseAmount)
+      queryBuilder.andWhere('transaction.purchaseAmount BETWEEN :min AND :max', {
+        min,
+        max,
+      })
+    }
+    if (tokenMarketValueHeight) {
+      const { min, max } = this.parseRange(tokenMarketValueHeight)
+      queryBuilder.andWhere('transaction.tokenMarketValueHeight BETWEEN :min AND :max', {
+        min,
+        max,
+      })
+    }
+    if (tokenMarketValue) {
+      const { min, max } = this.parseRange(tokenMarketValue)
+      queryBuilder.andWhere('transaction.tokenMarketValue BETWEEN :min AND :max', {
+        min,
+        max,
+      })
+    }
+    if (blackMarketRatio) {
+      const { min, max } = this.parseRange(blackMarketRatio)
+      queryBuilder.andWhere('transaction.blackMarketRatio BETWEEN :min AND :max', {
+        min,
+        max,
+      })
+    }
+    if (profit) {
+      const { min, max } = this.parseRange(profit)
+      queryBuilder.andWhere('transaction.profit BETWEEN :min AND :max', {
+        min,
+        max,
+      })
+    }
+    if (field && order) {
+      queryBuilder.orderBy(`transaction.${field}`, order)
+    }
+
+    // 使用 paginateRaw 函数进行分页
+    const paginationResult = paginate<WalletTransaction>(queryBuilder, { page, pageSize })
+
+    return paginationResult // 返回分页后的结果
   }
 
   // 根据交易签名更新盈利金额
@@ -90,92 +160,17 @@ export class WalletTransactionService {
     return updatedCount
   }
 
-  async getTransactions(queryConditions: Record<string, any>): Promise<WalletTransaction[]> {
-    const queryBuilder = this.walletTransactionRepository.createQueryBuilder('transaction')
-
-    // 动态构建查询条件
-    if (queryConditions.transactionSignature) {
-      queryBuilder.andWhere('transaction.transactionSignature = :transactionSignature', {
-        transactionSignature: queryConditions.transactionSignature,
-      })
+  // 解析范围值的函数，支持 "-" 表示范围
+  parseRange = (value: string): { min: number, max: number } | undefined => {
+    if (!value)
+      return undefined
+    const values = value.split('-').map(val => Number.parseFloat(val.trim())).filter(val => !Number.isNaN(val))
+    if (values.length === 1) {
+      return { min: values[0], max: 9999999 } // 单个值，表示最小值查询
     }
-
-    if (queryConditions.walletAddress) {
-      queryBuilder.andWhere('transaction.walletAddress = :walletAddress', {
-        walletAddress: queryConditions.walletAddress,
-      })
+    else if (values.length === 2) {
+      return { min: values[0], max: values[1] } // 范围查询
     }
-
-    if (queryConditions.ca) {
-      queryBuilder.andWhere('transaction.ca = :ca', {
-        ca: queryConditions.ca,
-      })
-    }
-
-    if (queryConditions.tokenSymbol) {
-      queryBuilder.andWhere('transaction.tokenSymbol = :tokenSymbol', {
-        tokenSymbol: queryConditions.tokenSymbol,
-      })
-    }
-
-    // 处理范围查询字段
-    if (queryConditions.purchaseAmount) {
-      const { min, max } = queryConditions.purchaseAmount
-      queryBuilder.andWhere('transaction.purchaseAmount >= :minPurchaseAmount AND transaction.purchaseAmount <= :maxPurchaseAmount', {
-        minPurchaseAmount: min,
-        maxPurchaseAmount: max,
-      })
-    }
-
-    if (queryConditions.tokenMarketValueHeight) {
-      const { min, max } = queryConditions.tokenMarketValueHeight
-      queryBuilder.andWhere('transaction.tokenMarketValueHeight >= :minTokenMarketValueHeight AND transaction.tokenMarketValueHeight <= :maxTokenMarketValueHeight', {
-        minTokenMarketValueHeight: min,
-        maxTokenMarketValueHeight: max,
-      })
-    }
-
-    if (queryConditions.tokenMarketValue) {
-      const { min, max } = queryConditions.tokenMarketValue
-      queryBuilder.andWhere('transaction.tokenMarketValue >= :minTokenMarketValue AND transaction.tokenMarketValue <= :maxTokenMarketValue', {
-        minTokenMarketValue: min,
-        maxTokenMarketValue: max,
-      })
-    }
-
-    if (queryConditions.blackMarketRatio) {
-      const { min, max } = queryConditions.blackMarketRatio
-      queryBuilder.andWhere('transaction.blackMarketRatio >= :minBlackMarketRatio AND transaction.blackMarketRatio <= :maxBlackMarketRatio', {
-        minBlackMarketRatio: min,
-        maxBlackMarketRatio: max,
-      })
-    }
-
-    if (queryConditions.profit) {
-      const { min, max } = queryConditions.profit
-      queryBuilder.andWhere('transaction.profit >= :minProfit AND transaction.profit <= :maxProfit', {
-        minProfit: min,
-        maxProfit: max,
-      })
-    }
-
-    // 处理其他非范围查询字段
-    if (queryConditions.type) {
-      queryBuilder.andWhere('transaction.type = :type', {
-        type: queryConditions.type,
-      })
-    }
-
-    if (queryConditions.isSentToExchange !== undefined) {
-      queryBuilder.andWhere('transaction.isSentToExchange = :isSentToExchange', {
-        isSentToExchange: queryConditions.isSentToExchange,
-      })
-    }
-
-    // 按 updatedAt 字段倒序排序（最新的记录排在前面）
-    queryBuilder.orderBy('transaction.updatedAt', 'DESC')
-
-    // 执行查询
-    return queryBuilder.getMany()
+    return undefined // 如果无法解析为范围，返回 undefined
   }
 }

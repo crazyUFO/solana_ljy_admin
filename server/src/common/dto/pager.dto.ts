@@ -37,7 +37,7 @@ export class PagerDto<T = any> {
   @ApiProperty({ enum: Order })
   @IsEnum(Order)
   @IsOptional()
-  @Transform(({ value }) => (value === 'asc' ? Order.ASC : Order.DESC))
+  @Transform(({ value }) => (value === 'ascend' ? Order.ASC : Order.DESC))
   order?: Order
 
   @Allow()
