@@ -1,7 +1,31 @@
 import { Tag } from 'ant-design-vue';
 import type { TableColumn } from '@/components/core/dynamic-table';
 import { formatToDateTime } from '@/utils/dateUtil';
+function formatTime(seconds) {
+  // 计算天数
+  const days = Math.floor(seconds / (24 * 3600));
+  seconds %= 24 * 3600; // 余下的秒数
 
+  // 计算小时
+  const hours = Math.floor(seconds / 3600);
+  seconds %= 3600; // 余下的秒数
+
+  // 计算分钟
+  const minutes = Math.floor(seconds / 60);
+  seconds %= 60; // 余下的秒数
+
+  // 最终的秒数
+  const remainingSeconds = seconds;
+
+  // 构建最终的字符串，只显示不为0的部分
+  let result = '';
+  if (days > 0) result += `${days} d `;
+  if (hours > 0) result += `${hours} h `;
+  if (minutes > 0) result += `${minutes} m `;
+  if (remainingSeconds > 0 || result === '') result += `${remainingSeconds} s`; // 如果结果为空，显示秒数
+
+  return result.trim();
+}
 export const transactionColumns: TableColumn[] = [
   {
     title: '交易签名',
@@ -74,6 +98,18 @@ export const transactionColumns: TableColumn[] = [
       componentProps: {
         placeholder: '输入范围,如10000-30000,输入单个数字视为下限',
       },
+    },
+  },
+  {
+    title: '至最高市值时间差',
+    dataIndex: 'timeToHighMarketValue',
+    width: 150,
+    customRender: ({ text }) => {
+      if (text) {
+        return formatTime(text);
+      } else {
+        return '-';
+      }
     },
   },
   {

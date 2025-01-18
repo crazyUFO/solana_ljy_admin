@@ -68,9 +68,10 @@ export class WalletTransactionController {
     @Body() body: {
       ca: string
       tokenMarketValueHeight: number
+      timeToHighMarketValue: number
     },
   ) {
-    const { ca, tokenMarketValueHeight } = body
+    const { ca, tokenMarketValueHeight, timeToHighMarketValue } = body
 
     // 参数验证
     if (!ca) {
@@ -80,12 +81,17 @@ export class WalletTransactionController {
     if (!tokenMarketValueHeight) {
       throw new BadRequestException('Missing required tokenMarketValueHeight')
     }
+    // 参数验证
+    if (!timeToHighMarketValue) {
+      throw new BadRequestException('Missing required timeToHighMarketValue')
+    }
 
     // 调用服务处理回调
     try {
       const result = await this.walletTransactionService.updateTransactionMarketValue(
         ca,
         tokenMarketValueHeight,
+        timeToHighMarketValue,
       )
       return result
     }

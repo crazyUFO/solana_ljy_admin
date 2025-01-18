@@ -139,7 +139,7 @@ export class WalletTransactionService {
   }
 
   // 根据交易签名更新最高市值
-  async updateTransactionMarketValue(ca: string, tokenMarketValueHeight: number): Promise<number> {
+  async updateTransactionMarketValue(ca: string, tokenMarketValueHeight: number, timeToHighMarketValue: number): Promise<number> {
     // 查找对应的交易记录
     const transactions = await this.walletTransactionRepository.find({
       where: { ca },
@@ -152,6 +152,7 @@ export class WalletTransactionService {
     for (const transaction of transactions) {
       // 更新交易记录的字段
       transaction.tokenMarketValueHeight = tokenMarketValueHeight
+      transaction.timeToHighMarketValue = timeToHighMarketValue
       // 保存更新后的交易记录
       updatedCount++
       await this.walletTransactionRepository.save(transaction)

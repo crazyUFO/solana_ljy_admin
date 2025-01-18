@@ -89,4 +89,7 @@ export class WalletTransaction {
   // 买入价格（单个代币的价格）
   @Column({ type: 'decimal', precision: 24, scale: 18, nullable: true })
   buyPrice: number | null // 记录购买时的单个代币价格
+
+  @Column({ type: 'int', nullable: true })
+  timeToHighMarketValue: number | null // 时间差（单位：秒，整数）
 }
