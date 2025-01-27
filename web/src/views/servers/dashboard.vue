@@ -22,13 +22,7 @@
       </template>
     </template> -->
     <template #toolbar>
-      <a-button
-        type="primary"
-        :disabled="!$auth('system:role:create')"
-        @click="openServerModal({})"
-      >
-        新增
-      </a-button>
+      <a-button type="primary" @click="openServerModal({})"> 新增 </a-button>
     </template>
   </DynamicTable>
 </template>
@@ -117,17 +111,12 @@
           },
         },
         {
-          auth: {
-            perm: 'system:role:update',
-            effect: 'disable',
-          },
           label: '同步',
           popConfirm: {
             title: '你确定要同步该配置到服务器吗？',
             placement: 'left',
             onConfirm: async () => {
               let res = await restartServer({ id: record.id });
-              console.log(res);
               notification.success({
                 message: `发送成功`,
                 description: `一共同步了${res}台客户端`,
@@ -138,10 +127,6 @@
         },
         {
           label: '删除',
-          auth: {
-            perm: 'system:role:update',
-            effect: 'disable',
-          },
           popConfirm: {
             title: '你确定要删除该配置吗？',
             placement: 'left',

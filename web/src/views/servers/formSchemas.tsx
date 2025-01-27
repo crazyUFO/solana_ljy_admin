@@ -1,5 +1,5 @@
 import type { FormSchema } from '@/components/core/schema-form/';
-
+import { hasPermission } from '@/permission';
 export const serversettingSchemas: FormSchema[] = [
   // 全局设置
   {
@@ -170,6 +170,7 @@ export const serversettingSchemas: FormSchema[] = [
     label: '回调地址',
     helpMessage: '通知交易端的回调地址',
     rules: [{ type: 'string' }],
+    vShow: () => hasPermission('system:role:create'),
   },
   {
     field: 'divider-basic',
