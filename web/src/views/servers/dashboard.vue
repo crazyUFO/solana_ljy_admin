@@ -58,6 +58,7 @@
       modalProps: {
         title: `${record.id ? '编辑' : '新增'}服务器设置`,
         width: 700,
+        bodyStyle: { maxHeight: '70vh', overflowY: 'auto' },
         onFinish: async (values) => {
           values.id = record.id;
           let settings = {};
@@ -82,7 +83,7 @@
         },
       },
       formProps: {
-        labelWidth: 100,
+        labelWidth: 150,
         schemas: serversettingSchemas,
         autoSubmitOnEnter: true,
       },
@@ -91,7 +92,6 @@
     if (record.id) {
       console.log(record);
       let settings = JSON.parse(record.settings);
-      console.log(settings);
       formRef?.setFieldsValue({
         name: record.name,
         // ip: record.ip,
@@ -117,6 +117,10 @@
           },
         },
         {
+          auth: {
+            perm: 'system:role:update',
+            effect: 'disable',
+          },
           label: '同步',
           popConfirm: {
             title: '你确定要同步该配置到服务器吗？',
@@ -134,6 +138,10 @@
         },
         {
           label: '删除',
+          auth: {
+            perm: 'system:role:update',
+            effect: 'disable',
+          },
           popConfirm: {
             title: '你确定要删除该配置吗？',
             placement: 'left',

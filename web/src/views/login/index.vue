@@ -64,8 +64,8 @@
   const loading = ref(false);
   const captcha = ref('');
   const loginFormModel = ref({
-    username: 'admin',
-    password: 'a123456',
+    username: '',
+    password: '',
     verifyCode: '',
     captchaId: '',
   });
