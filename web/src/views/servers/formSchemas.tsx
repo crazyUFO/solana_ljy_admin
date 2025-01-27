@@ -103,9 +103,19 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    label: '7天盈利',
+    label: '7天盈利额',
     helpMessage: '7天盈利的金额',
-    rules: [{ required: true, type: 'number' }],
+    rules: [{ type: 'number' }],
+  },
+  {
+    field: 'win_rate',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    label: '总胜率',
+    helpMessage: '总胜率0-1',
+    rules: [{ type: 'number' }],
   },
   {
     field: 'win_rate_7d',
@@ -113,9 +123,9 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    label: '七天胜率',
-    helpMessage: '7天的胜负率0-1',
-    rules: [{ required: true, type: 'number' }],
+    label: '七天盈利率',
+    helpMessage: '七天盈利率0-1',
+    rules: [{ type: 'number' }],
   },
   {
     field: 'buy_frequency',
@@ -123,10 +133,20 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    label: '七天买入频率',
+    label: '七天买入次数',
     helpMessage: '七天内买入的单数',
-    rules: [{ required: true, type: 'number' }],
+    rules: [{ type: 'number' }],
     labelWidth: 150,
+  },
+  {
+    field: 'subscription_cycle',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: '单位是分钟，决定一个token的释放时间',
+    label: '订阅活跃度',
+    rules: [{ type: 'number' }],
   },
   {
     field: 'remove_duplicates_by_name',
@@ -154,16 +174,7 @@ export const serversettingSchemas: FormSchema[] = [
     },
     labelWidth: 150,
   },
-  {
-    field: 'subscription_cycle',
-    component: 'InputNumber',
-    colProps: {
-      span: 12,
-    },
-    helpMessage: '单位是分钟，决定一个token的释放时间',
-    label: '订阅活跃度',
-    rules: [{ required: true, type: 'number' }],
-  },
+
   {
     field: 'transaction_address_group',
     component: 'InputTextArea',
@@ -175,7 +186,7 @@ export const serversettingSchemas: FormSchema[] = [
   {
     field: 'divider-basic',
     component: 'Divider',
-    label: '公共配置-跨度检测设置',
+    label: '跨度检测设置一档',
     componentProps: {
       orientation: 'center',
     },
@@ -256,6 +267,72 @@ export const serversettingSchemas: FormSchema[] = [
     dynamicRules: ({ formModel }) => {
       return formModel.spread_detection_settings_enabled
         ? [{ required: true, message: '请填写允许的次数计次' }]
+        : [];
+    },
+  },
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '跨度检测设置二档',
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  // 跨度设置
+  {
+    field: 'spread_detection_settings_enabled_two',
+    component: 'Switch',
+    label: '检测开关',
+    componentProps: ({ formInstance }) => ({
+      onChange(e) {
+        console.log('开关状态:', e);
+        requestAnimationFrame(() => {
+          e ? formInstance?.validateFields() : formInstance?.clearValidate();
+        });
+      },
+    }),
+  },
+  {
+    field: 'spread_detection_settings_spread_two',
+    component: 'InputNumber',
+    label: '跨度',
+    colProps: {
+      span: 12,
+    },
+    dynamicRules: ({ formModel }) => {
+      return formModel.spread_detection_settings_enabled_two
+        ? [{ required: true, message: '请填写跨度' }]
+        : [];
+    },
+  },
+  {
+    field: 'spread_detection_settings_amount_range_two',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    label: '金额限制',
+    helpMessage: '限制sol的金额',
+    rules: [{ type: 'number' }],
+    dynamicRules: ({ formModel }) => {
+      return formModel.spread_detection_settings_enabled_two
+        ? [{ required: true, message: '请填写限制sol的金额' }]
+        : [];
+    },
+  },
+  {
+    field: 'spread_detection_settings_max_count_two',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    label: '允许次数',
+    rules: [{ type: 'number' }],
+    helpMessage: '对出现的符合条件的计次，触发之后就排除',
+    labelWidth: 150,
+    dynamicRules: ({ formModel }) => {
+      return formModel.spread_detection_settings_enabled_two
+        ? [{ required: true, message: '请填写允许的次数' }]
         : [];
     },
   },
