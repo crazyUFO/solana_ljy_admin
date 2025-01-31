@@ -99,4 +99,28 @@ export class WalletTransactionController {
       throw new BadRequestException(error)
     }
   }
+
+  // 查询指定时间范围内的入库条数
+  @Get('countByTimestampRange')
+  @ApiResult({ type: Object }) // 返回一个数字
+  async getTransactionCountByTimestampRange(
+    @Query('startTimestamp') startTimestamp: number,
+    @Query('endTimestamp') endTimestamp: number,
+  ) {
+    // 参数验证
+    if (!startTimestamp || !endTimestamp) {
+      throw new BadRequestException('Missing required startTimestamp or endTimestamp')
+    }
+    if (Number.isNaN(startTimestamp) || Number.isNaN(endTimestamp)) {
+      throw new BadRequestException('Invalid timestamp')
+    }
+    if (startTimestamp > endTimestamp) {
+      throw new BadRequestException('startTimestamp must be less than endTimestamp')
+    }
+
+    return this.walletTransactionService.getTransactionCountByTimestampRange(
+      startTimestamp,
+      endTimestamp,
+    )
+  }
 }

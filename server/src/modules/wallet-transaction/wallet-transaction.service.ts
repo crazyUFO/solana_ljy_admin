@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Equal, Like, Repository } from 'typeorm'
+import { subDays } from 'date-fns'
+import { Between, Equal, Like, Repository } from 'typeorm'
 import { paginate } from '~/helper/paginate'
 import { ExchangeWallet } from '../exchange/exchange-wallet.entity'
 import { WalletTransaction } from './wallet-transaction.entity'
@@ -173,5 +174,72 @@ export class WalletTransactionService {
       return { min: values[0], max: values[1] } // 范围查询
     }
     return undefined // 如果无法解析为范围，返回 undefined
+  }
+
+  // 查询指定时间范围内的入库条数，以及前一天的入库条数
+  async getTransactionCountByTimestampRange(
+    startTimestamp: number,
+    endTimestamp: number,
+  ): Promise<{
+      today_data: object // 指定时间范围内的入库条数
+      yes_data: object // 前一天的入库条数
+    }> {
+    const startDate = new Date(startTimestamp) // 将时间戳转换为 Date 对象
+    const endDate = new Date(endTimestamp) // 将时间戳转换为 Date 对象
+    // **手动加 2 小时，转换为数据库存储的 UTC+2 时间**
+    // const adjustedStartDate = addHours(startDate, 2)
+    // const adjustedEndDate = addHours(endDate, 2)
+
+    console.log(startDate, endDate)
+    // 查询指定时间范围内的入库条数
+    const today_data = await this.walletTransactionRepository.find({
+      where: {
+        createdAt: Between(startDate, endDate), // 使用 Between 查询
+      },
+    })
+    const data = {
+      inSetCount: today_data.length,
+      sentToBroadcastCount: today_data.filter(value => value.sentToBroadcastAt != null).length,
+      sentToExchangeCount: today_data.filter(value => value.sentToExchangeAt != null).length,
+      types: [1, 2, 3, 4].map((type) => {
+        const filteredData = today_data.filter(value => value.type === type)
+        return {
+          title: `类型${type}`,
+          sentToBroadcastCount: filteredData.filter(value => value.sentToBroadcastAt != null).length,
+          sentToExchangeCount: filteredData.filter(value => value.sentToExchangeAt != null).length,
+          inSetCount: filteredData.length,
+        }
+      }),
+    }
+    // 计算前一天的开始和结束时间
+    const previousDayStart = subDays(startDate, 1) // 前一天 00:00:00
+    const previousDayEnd = subDays(endDate, 1) // 前一天 23:59:59
+    console.log(previousDayStart, previousDayEnd)
+    // 查询前一天的入库条数
+    const yes_data = await this.walletTransactionRepository.find({
+      where: {
+        createdAt: Between(previousDayStart, previousDayEnd), // 使用 Between 查询
+      },
+    })
+
+    const data2 = {
+      inSetCount: yes_data.length,
+      sentToBroadcastCount: yes_data.filter(value => value.sentToBroadcastAt != null).length,
+      sentToExchangeCount: yes_data.filter(value => value.sentToExchangeAt != null).length,
+      types: [1, 2, 3, 4].map((type) => {
+        const filteredData = yes_data.filter(value => value.type === type)
+        return {
+          title: `类型${type}`,
+          sentToBroadcastCount: filteredData.filter(value => value.sentToBroadcastAt != null).length,
+          sentToExchangeCount: filteredData.filter(value => value.sentToExchangeAt != null).length,
+          inSetCount: filteredData.length,
+        }
+      }),
+    }
+
+    return {
+      today_data: data,
+      yes_data: data2,
+    }
   }
 }
