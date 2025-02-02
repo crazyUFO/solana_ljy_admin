@@ -8,6 +8,7 @@
           suffix="条"
           :typesData="today_data.types"
           dataKey="inSetCount"
+          :isLoading="isLoading"
         />
         <OverviewHeaderItem
           title="今日播报"
@@ -15,6 +16,7 @@
           suffix="条"
           :typesData="today_data.types"
           dataKey="sentToBroadcastCount"
+          :isLoading="isLoading"
         />
         <OverviewHeaderItem
           title="今日交易"
@@ -22,6 +24,7 @@
           suffix="条"
           :typesData="today_data.types"
           dataKey="sentToExchangeCount"
+          :isLoading="isLoading"
         />
       </div>
       <div class="ov-header">
@@ -31,6 +34,7 @@
           suffix="条"
           :typesData="yes_data.types"
           dataKey="inSetCount"
+          :isLoading="isLoading"
         />
         <OverviewHeaderItem
           title="昨日播报"
@@ -38,6 +42,7 @@
           suffix="条"
           :typesData="yes_data.types"
           dataKey="sentToBroadcastCount"
+          :isLoading="isLoading"
         />
         <OverviewHeaderItem
           title="昨日交易"
@@ -45,6 +50,7 @@
           suffix="条"
           :typesData="yes_data.types"
           dataKey="sentToExchangeCount"
+          :isLoading="isLoading"
         />
       </div>
       <div class="ov-content">
@@ -97,7 +103,7 @@
     types: [],
   });
   const transactionList = ref({ today_data: today_data, yes_data: yes_data });
-
+  let isLoading = ref(false);
   const fetchTransactions = async () => {
     try {
       const now = new Date();
@@ -119,15 +125,18 @@
         59,
         999,
       ).getTime();
+      isLoading.value = true;
       const res = await getTransactionListByTime({
         startTimestamp: startOfDay,
         endTimestamp: endOfDay,
       });
+      isLoading.value = false;
       transactionList.value = res; // 假设返回的数据在 res.data
       console.log(res);
       today_data.value = res.today_data;
       yes_data.value = res.yes_data;
     } catch (error) {
+      isLoading.value = false;
       console.error('获取交易列表失败:', error);
     }
   };

@@ -1,5 +1,5 @@
 <template>
-  <Card class="header-item-card" hoverable>
+  <Card class="header-item-card" hoverable :loading="isLoading">
     <div class="title">{{ title }}</div>
     <Statistic class="value" :value="value" :duration="2000" />
     <span class="suffix">{{ suffix }}</span>
@@ -47,6 +47,10 @@
     },
     dataKey: {
       type: String,
+      required: true,
+    },
+    isLoading: {
+      type: Boolean,
       required: true,
     },
   });
