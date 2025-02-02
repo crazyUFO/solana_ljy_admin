@@ -120,19 +120,31 @@ export class WalletTransactionService {
   }
 
   // 根据交易签名更新盈利金额
-  async updateTransaction(transactionSignature: string, type: number, profit: number): Promise<string> {
+  async updateTransaction(dio): Promise<string> {
+    const { transactionSignature, type, profit, isSentToExchange } = dio
+    if (!transactionSignature) {
+      throw new NotFoundException('transactionSignature not found')
+    }
+    if (!type) {
+      throw new NotFoundException('type not found')
+    }
     // 查找对应的交易记录
     const transaction = await this.walletTransactionRepository.findOne({
       where: { transactionSignature, type },
     })
-
     if (!transaction) {
-      throw new NotFoundException('Transaction not found')
+      throw new NotFoundException('transaction not found')
     }
+    console.log(dio)
 
-    // 更新字段值
-    transaction.profit = profit
-
+    if (profit) {
+      // 更新字段值
+      transaction.profit = profit
+    }
+    if (isSentToExchange) {
+      // 更新字段值
+      transaction.isSentToExchange = isSentToExchange
+    }
     // 保存更新后的交易记录
     await this.walletTransactionRepository.save(transaction)
 

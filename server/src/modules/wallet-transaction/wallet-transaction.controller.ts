@@ -5,6 +5,7 @@ import { Public } from '../auth/decorators/public.decorator'
 import { WalletTransaction } from './wallet-transaction.entity'
 import { WalletTransactionService } from './wallet-transaction.service'
 import { TransactionQueryDto } from './wallet-transaction-query.dto'
+import { TransactionUpdateDto } from './wallet-transaction-update.dto'
 
 @Controller('wallet-transactions')
 @Public()
@@ -27,39 +28,32 @@ export class WalletTransactionController {
 
   @Post('update')
   async updateTransaction(
-    @Body() body: {
-      transactionSignature: string
-      type: number
-      profit: number
-    },
+    @Body() dio: TransactionUpdateDto,
   ) {
-    const { transactionSignature, type, profit } = body
-
-    // 参数验证
-    if (!transactionSignature) {
-      throw new BadRequestException('Missing required transactionSignature')
-    }
-    // 参数验证
-    if (!type) {
-      throw new BadRequestException('Missing required type')
-    }
-    // 参数验证
-    if (!profit) {
-      throw new BadRequestException('Missing required profit')
-    }
+    // // 参数验证
+    // if (!transactionSignature) {
+    //   throw new BadRequestException('Missing required transactionSignature')
+    // }
+    // // 参数验证
+    // if (!type) {
+    //   throw new BadRequestException('Missing required type')
+    // }
+    // // 参数验证
+    // if (!profit) {
+    //   throw new BadRequestException('Missing required profit')
+    // }
 
     // 调用服务处理回调
-    try {
-      const result = await this.walletTransactionService.updateTransaction(
-        transactionSignature,
-        type,
-        profit,
-      )
-      return result
-    }
-    catch (error) {
-      throw new BadRequestException('Failed to update transaction')
-    }
+    return this.walletTransactionService.updateTransaction(dio)
+    // try {
+    //   const result = await this.walletTransactionService.updateTransaction(
+    //     dio
+    //   )
+    //   return result
+    // }
+    // catch (error) {
+    //   throw new BadRequestException('Failed to update transaction')
+    // }
   }
 
   @Post('updateTokenMarketValueHeight')

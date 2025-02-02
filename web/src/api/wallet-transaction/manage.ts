@@ -39,6 +39,17 @@ export function createTransaction(params: any) {
   });
 }
 
+/**
+ * @description 创建新服务器
+ */
+export function getTransactionListByTime(query: any) {
+  return request({
+    url: `/api/wallet-transactions/countByTimestampRange`,
+    method: 'get',
+    params: query,
+  });
+}
+
 // /**
 //  * @description 获取英雄联盟英雄列表
 //  */
