@@ -14,8 +14,12 @@
     formItemContext.onFieldChange();
   });
 
+  // 监听 modelValue 的变化，将值分别赋给 minimum 和 maximum
   watch(modelValue, (value) => {
-    if (!value) {
+    if (Array.isArray(value) && value.length === 2) {
+      minimum.value = value[0];
+      maximum.value = value[1];
+    } else {
       minimum.value = maximum.value = '';
     }
   });
@@ -26,15 +30,15 @@
     <a-input-group compact>
       <a-input-number
         v-model:value="minimum"
-        style="width: 100px; text-align: center"
-        placeholder="Minimum"
+        style="width: 70px; text-align: center"
+        placeholder="Min"
       />
       <div class="!align-sub px-1"> 至 </div>
       <a-input-number
         v-model:value="maximum"
         class="site-input-right"
-        style="width: 100px; text-align: center"
-        placeholder="Maximum"
+        style="width: 70px; text-align: center"
+        placeholder="Max"
       />
     </a-input-group>
   </a-form-item-rest>
