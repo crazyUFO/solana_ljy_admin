@@ -309,11 +309,71 @@ export const serversettingSchemas: FormSchema[] = [
       ],
     },
   },
+  // 持有者检测-持有者
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '持有者检测-持有者过滤',
+    helpMessage: ['检测市值 + 持有人数', '市值低于设置的市值 并且 持有人数低于设置的人数'],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'holder_detection_check_enabled',
+    component: 'Switch',
+    label: '检测开关',
+    componentProps: ({ formInstance }) => ({
+      onChange(e) {
+        requestAnimationFrame(() => {
+          e ? formInstance?.validateFields() : formInstance?.clearValidate();
+        });
+      },
+    }),
+  },
+  {
+    field: 'holder_detection_market_value',
+    component: 'InputNumber',
+    label: '市值',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['检测市值', '小于设置值则过滤(需要和持有人数参数一起使用)', '单位($)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.holder_detection_check_enabled
+        ? [{ required: true, message: '检测市值' }]
+        : [];
+    },
+    componentSlots: () => {
+      return {
+        prefix: () => '<',
+      };
+    },
+  },
+  {
+    field: 'holder_detection_holder_count',
+    component: 'InputNumber',
+    label: '持有人数',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['持有人数', '小于设置值则过滤(需要和市值参数一起使用)', '单位(人)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.holder_detection_check_enabled
+        ? [{ required: true, message: '持有人数' }]
+        : [];
+    },
+    componentSlots: () => {
+      return {
+        prefix: () => '<',
+      };
+    },
+  },
   // 持有者检测-大额检测
   {
     field: 'divider-basic',
     component: 'Divider',
-    label: '持有者检测-大额检测',
+    label: '持有者检测-大额买单过滤',
     componentProps: {
       orientation: 'center',
     },
@@ -337,13 +397,13 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    helpMessage: ['检测金额', '检测大于等于', '单位(sol)'],
+    helpMessage: ['检测金额', '大于设置值则过滤', '单位(sol)'],
     dynamicRules: ({ formModel }) => {
       return formModel.large_txn_check_enabled ? [{ required: true, message: '检测金额' }] : [];
     },
     componentSlots: () => {
       return {
-        prefix: () => '≥',
+        prefix: () => '>',
       };
     },
   },
@@ -351,7 +411,7 @@ export const serversettingSchemas: FormSchema[] = [
   {
     field: 'divider-basic',
     component: 'Divider',
-    label: '持有者检测-购买一致性检测',
+    label: '持有者检测-购买一致性过滤',
     componentProps: {
       orientation: 'center',
     },
@@ -427,7 +487,7 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    helpMessage: ['重复单数', '比如设置1,那就是范围内允许有1单重复', '单位(次)'],
+    helpMessage: ['重复单数', '大于设置值则过滤', '单位(次)'],
     dynamicRules: ({ formModel }) => {
       return formModel.buy_consistency_check_enabled
         ? [{ required: true, message: '重复单数' }]
@@ -435,16 +495,162 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '≤',
+        prefix: () => '>',
       };
     },
   },
-
+  // 持有者检测-购买一致性检测 低市值持
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '有者检测-低市值-购买一致性过滤',
+    helpMessage: [
+      '低市值购买一致性检测',
+      '此项配置与购买一致性过滤互斥',
+      '1.优先判断市值低于设定值,或者持有者低于设置值',
+      '2.然后采用本项配置',
+      '3.否则使用购买一致性过滤的配置进行过滤',
+    ],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'buy_consistency_low_maket_value_check_enabled',
+    component: 'Switch',
+    label: '检测开关',
+    componentProps: ({ formInstance }) => ({
+      onChange(e) {
+        requestAnimationFrame(() => {
+          e ? formInstance?.validateFields() : formInstance?.clearValidate();
+        });
+      },
+    }),
+  },
+  {
+    field: 'buy_consistency_low_maket_value',
+    component: 'InputNumber',
+    label: '市值',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['检测市值', '检测小于设置值', '单位($)'],
+    componentSlots: () => {
+      return {
+        prefix: () => '<',
+      };
+    },
+  },
+  {
+    field: 'buy_consistency_holder_count',
+    component: 'InputNumber',
+    label: '持有人数',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['持有人数', '小于设置值', '单位(人)'],
+    componentSlots: () => {
+      return {
+        prefix: () => '<',
+      };
+    },
+  },
+  {
+    field: 'buy_consistency_holder_check_scope',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    label: '检测范围',
+    helpMessage: [
+      '检测数据的范围',
+      '列如取前20条,前30条,前50条',
+      '最大值前100',
+      '*假如这边不设置，则使用共设置中的值',
+    ],
+    rules: [{ type: 'number' }],
+    componentSlots: () => {
+      return {
+        prefix: () => '前',
+      };
+    },
+  },
+  {
+    field: 'buy_consistency_low_market_value_time_range',
+    component: 'InputNumber',
+    label: '检测时间',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['检测时间', '比如设置1就是1秒内,设置2就是两秒内', '单位(秒)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.buy_consistency_low_maket_value_check_enabled
+        ? [{ required: true, message: '检测时间' }]
+        : [];
+    },
+    componentSlots: () => {
+      return {
+        prefix: () => '内',
+      };
+    },
+  },
+  {
+    field: 'buy_consistency_low_market_value_single_txn_amount',
+    component: () => InputNumberRange,
+    label: '检测金额',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['金额范围', '检测范围内的金额', '单位(sol)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.buy_consistency_low_maket_value_check_enabled
+        ? [{ required: true, message: '检测金额' }]
+        : [];
+    },
+    rules: [
+      {
+        required: true,
+        type: 'array',
+        trigger: 'change',
+        validator(_, value: string[]) {
+          const isOk =
+            Array.isArray(value) &&
+            value.length === 2 &&
+            value.every((val) => /^(0|[1-9]\d*)(\.\d+)?$/.test(val));
+          return isOk ? Promise.resolve() : Promise.reject('请输入金额范围');
+        },
+      },
+    ],
+    // 将多个值映射为多个字段
+    transform([minNum, maxNum] = []) {
+      console.log(minNum, maxNum);
+      return [minNum, maxNum];
+    },
+  },
+  {
+    field: 'buy_consistency_low_market_value_allowed_times',
+    component: 'InputNumber',
+    label: '重复单数',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['重复单数', '大于设置值则过滤', '单位(次)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.buy_consistency_low_maket_value_check_enabled
+        ? [{ required: true, message: '重复单数' }]
+        : [];
+    },
+    componentSlots: () => {
+      return {
+        prefix: () => '>',
+      };
+    },
+  },
   // 持有者检测-转账时间一致性检测
   {
     field: 'divider-basic',
     component: 'Divider',
-    label: '持有者检测-转账时间一致性检测',
+    label: '持有者检测-转账时间一致性过滤',
     componentProps: {
       orientation: 'center',
     },
@@ -487,7 +693,7 @@ export const serversettingSchemas: FormSchema[] = [
     colProps: {
       span: 12,
     },
-    helpMessage: ['重复单数', '比如设置1,那就是范围内允许有1单重复', '单位(次)'],
+    helpMessage: ['重复单数', '大于设置值则过滤', '单位(次)'],
     dynamicRules: ({ formModel }) => {
       return formModel.transfer_consistency_check_enabled
         ? [{ required: true, message: '重复单数' }]
@@ -495,7 +701,7 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '≤',
+        prefix: () => '>',
       };
     },
   },
@@ -504,7 +710,11 @@ export const serversettingSchemas: FormSchema[] = [
   {
     field: 'divider-basic',
     component: 'Divider',
-    label: '持有者检测-相似性检测',
+    label: '持有者检测-相似性过滤',
+    helpMessage: [
+      '相似性过滤',
+      '当总数开关开启，只计算各大小标签加在一起去重后的总数,其他小标签则失效,反之就一个个计算小标签的值是否符合过滤标准',
+    ],
     componentProps: {
       orientation: 'center',
     },
@@ -540,7 +750,7 @@ export const serversettingSchemas: FormSchema[] = [
       span: 8,
     },
     labelWidth: 90,
-    helpMessage: ['钓鱼钱包的个数', '检测小于', '单位(个)'],
+    helpMessage: ['钓鱼钱包的个数', '大于设置值则过滤', '单位(个)'],
     dynamicRules: ({ formModel }) => {
       return formModel.similarity_phishing_wallet_check_enabled
         ? [{ required: true, message: '钓鱼钱包的个数' }]
@@ -548,14 +758,14 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '<',
+        prefix: () => '>',
       };
     },
   },
   {
     field: 'similarity_insider_trading_check_enabled',
     component: 'Checkbox',
-    label: '老鼠仓钱包',
+    label: '老鼠钱包',
     colProps: {
       span: 4,
     },
@@ -578,7 +788,7 @@ export const serversettingSchemas: FormSchema[] = [
       span: 8,
     },
     labelWidth: 90,
-    helpMessage: ['老鼠仓钱包的个数', '检测小于', '单位(个)'],
+    helpMessage: ['老鼠仓钱包的个数', '大于设置值则过滤', '单位(个)'],
     dynamicRules: ({ formModel }) => {
       return formModel.similarity_insider_trading_check_enabled
         ? [{ required: true, message: '老鼠仓钱包的个数' }]
@@ -586,14 +796,14 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '<',
+        prefix: () => '>',
       };
     },
   },
   {
     field: 'similarity_same_source_wallet_check_enabled',
     component: 'Checkbox',
-    label: '同钱包来源',
+    label: '同源钱包',
     colProps: {
       span: 4,
     },
@@ -616,7 +826,7 @@ export const serversettingSchemas: FormSchema[] = [
       span: 8,
     },
     labelWidth: 90,
-    helpMessage: ['同钱包来源的个数', '检测小于', '单位(个)'],
+    helpMessage: ['同钱包来源的个数', '大于设置值则过滤', '单位(个)'],
     dynamicRules: ({ formModel }) => {
       return formModel.similarity_same_source_wallet_check_enabled
         ? [{ required: true, message: '同钱包来源的个数' }]
@@ -624,14 +834,14 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '<',
+        prefix: () => '>',
       };
     },
   },
   {
     field: 'similarity_dev_team_check_enabled',
     component: 'Checkbox',
-    label: 'dev团队',
+    label: 'dev钱包',
     colProps: {
       span: 4,
     },
@@ -654,7 +864,7 @@ export const serversettingSchemas: FormSchema[] = [
       span: 8,
     },
     labelWidth: 90,
-    helpMessage: ['dev团队的个数', '检测小于', '单位(个)'],
+    helpMessage: ['dev团队的个数', '大于设置值则过滤', '单位(个)'],
     dynamicRules: ({ formModel }) => {
       return formModel.similarity_dev_team_check_enabled
         ? [{ required: true, message: 'dev团队的个数' }]
@@ -662,7 +872,45 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '<',
+        prefix: () => '>',
+      };
+    },
+  },
+  {
+    field: 'similarity_alert_wallet_check_enabled',
+    component: 'Checkbox',
+    label: '感叹号钱包',
+    colProps: {
+      span: 4,
+    },
+    componentProps: ({ formInstance }) => ({
+      onChange: (e) => {
+        if (e.target.checked) {
+          // 当总数被选中时，取消其他 Checkbox 的选中状态
+          formInstance.setFieldsValue({
+            similarity_total_check_enabled: false,
+          });
+        }
+      },
+    }),
+  },
+  {
+    field: 'similarity_alert_wallet_count',
+    component: 'InputNumber',
+    label: '个数',
+    colProps: {
+      span: 8,
+    },
+    labelWidth: 90,
+    helpMessage: ['感叹号钱包', '大于设置值则过滤', '单位(个)'],
+    dynamicRules: ({ formModel }) => {
+      return formModel.similarity_alert_wallet_check_enabled
+        ? [{ required: true, message: '感叹号钱包的个数' }]
+        : [];
+    },
+    componentSlots: () => {
+      return {
+        prefix: () => '>',
       };
     },
   },
@@ -682,6 +930,7 @@ export const serversettingSchemas: FormSchema[] = [
             similarity_insider_trading_check_enabled: false,
             similarity_same_source_wallet_check_enabled: false,
             similarity_dev_team_check_enabled: false,
+            similarity_alert_wallet_check_enabled: false,
           });
         }
       },
@@ -695,7 +944,7 @@ export const serversettingSchemas: FormSchema[] = [
       span: 8,
     },
     labelWidth: 90,
-    helpMessage: ['所有检测加在一起的总数', '检测小于', '单位(个)'],
+    helpMessage: ['所有检测加在一起的总数', '大于设置值则过滤', '单位(个)'],
     dynamicRules: ({ formModel }) => {
       return formModel.similarity_total_check_enabled
         ? [{ required: true, message: '总的数量' }]
@@ -703,7 +952,7 @@ export const serversettingSchemas: FormSchema[] = [
     },
     componentSlots: () => {
       return {
-        prefix: () => '<',
+        prefix: () => '>',
       };
     },
   },
