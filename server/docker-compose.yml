@@ -1,6 +1,8 @@
 services:
   ljy-admin-web:
     image: ljy-admin-web:latest
+    logging:
+      driver: none
     container_name: admin_web
     ports:
       - '80:80'
@@ -11,6 +13,8 @@ services:
       - ljy_admin_net
   ljy-admin-server:
     image: ljy-admin-server:latest
+    logging:
+      driver: none
     container_name: api_server
     env_file:
       - .env
@@ -25,6 +29,8 @@ services:
     
   mysql:
     image: mysql:latest
+    logging:
+      driver: none
     container_name: api_mysql
     restart: always
     env_file:
@@ -48,6 +54,8 @@ services:
 
   redis:
     image: redis:latest
+    logging:
+      driver: none
     container_name: api_redis
     restart: always
     env_file:
