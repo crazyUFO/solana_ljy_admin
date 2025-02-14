@@ -1366,4 +1366,79 @@ export const serversettingSchemas: FormSchema[] = [
       };
     },
   },
+  // type 5
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '类型五设置',
+    helpMessage: ['dev创建者', 'dev创建者初始购买量满足设置条件则播报'],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'type5_settings_transaction_enabled',
+    component: 'Switch',
+    label: '交易开关',
+  },
+  {
+    field: 'type5_settings_create_amount',
+    component: 'InputNumber',
+    colProps: {
+      span: 12,
+    },
+    label: '初始购买',
+    helpMessage: ['初始购买', 'dev创建mint时的初始购买量', '单位(sol)'],
+    rules: [{ required: true, type: 'number' }],
+    componentSlots: () => {
+      return {
+        prefix: () => '≥',
+      };
+    },
+  },
+  // type 6
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '类型六设置',
+    helpMessage: ['检测市值 + 持有人数', '市值大于设置值,持有人数小于设置值'],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'type6_settings_transaction_enabled',
+    component: 'Switch',
+    label: '交易开关',
+  },
+  {
+    field: 'type6_settings_market_cap_value',
+    component: 'InputNumber',
+    label: '检测市值',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['检测市值', '大于等于设置值(需要和持有人数参数一起使用)', '单位($)'],
+    rules: [{ required: true, type: 'number' }],
+    componentSlots: () => {
+      return {
+        prefix: () => '≥',
+      };
+    },
+  },
+  {
+    field: 'type6_settings_holder_count',
+    component: 'InputNumber',
+    label: '持有人数',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['持有人数', '小于设置值(需要和市值参数一起使用)', '单位(人)'],
+    rules: [{ required: true, type: 'number' }],
+    componentSlots: () => {
+      return {
+        prefix: () => '<',
+      };
+    },
+  },
 ];
