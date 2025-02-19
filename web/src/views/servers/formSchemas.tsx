@@ -1420,6 +1420,7 @@ export const serversettingSchemas: FormSchema[] = [
     },
     helpMessage: ['检测市值', '大于等于设置值(需要和持有人数参数一起使用)', '单位($)'],
     rules: [{ required: true, type: 'number' }],
+
     componentSlots: () => {
       return {
         prefix: () => '≥',
@@ -1438,6 +1439,82 @@ export const serversettingSchemas: FormSchema[] = [
     componentSlots: () => {
       return {
         prefix: () => '<',
+      };
+    },
+  },
+  // type 7
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '类型七设置',
+    helpMessage: ['新建的ca检测推特 '],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'type7_settings_transaction_enabled',
+    component: 'Switch',
+    label: '交易开关',
+  },
+  {
+    field: 'type7_settings_create_amount_range',
+    component: () => InputNumberRange,
+    colProps: {
+      span: 12,
+    },
+    label: '初始购买',
+    helpMessage: ['初始购买', 'dev创建mint时的初始购买量', '单位(sol)'],
+    rules: [
+      {
+        type: 'array',
+        trigger: 'change',
+        validator(_, value: string[]) {
+          // 如果值为空，直接通过验证
+          if (value.every((val) => val == null)) {
+            return Promise.resolve();
+          }
+
+          // 如果值不为空，验证格式
+          const isOk =
+            Array.isArray(value) &&
+            value.length === 2 &&
+            value.every((val) => /^(0|[1-9]\d*)(\.\d+)?$/.test(val));
+
+          return isOk ? Promise.resolve() : Promise.reject('请输入有效的数字范围');
+        },
+      },
+    ],
+    // 将多个值映射为多个字段
+    transform([minNum, maxNum] = []) {
+      if (!minNum && !maxNum) {
+        return [];
+      }
+      return [minNum, maxNum];
+    },
+  },
+  {
+    field: 'type7_settings_is_blue_verified',
+    component: 'Checkbox',
+    label: '是否蓝V',
+    helpMessage: ['是否蓝V', '检测当前ca再推特搜索出的博主 是否蓝V'],
+    colProps: {
+      span: 12,
+    },
+  },
+  {
+    field: 'type7_settings_followers_count',
+    component: 'InputNumber',
+    label: '粉丝数量',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['粉丝数量', '检测当前ca再推特搜索出的博主 粉丝数量', '单位(个)'],
+    rules: [{ required: true, type: 'number' }],
+
+    componentSlots: () => {
+      return {
+        prefix: () => '≥',
       };
     },
   },
