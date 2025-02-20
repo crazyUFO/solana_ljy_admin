@@ -1518,4 +1518,86 @@ export const serversettingSchemas: FormSchema[] = [
       };
     },
   },
+  // type 8
+  {
+    field: 'divider-basic',
+    component: 'Divider',
+    label: '类型八设置',
+    helpMessage: ['dev首次卖出检测', '再dev首次卖出X秒内,对该ca的Y值以上的买单进行检测'],
+    componentProps: {
+      orientation: 'center',
+    },
+  },
+  {
+    field: 'type8_settings_transaction_enabled',
+    component: 'Switch',
+    label: '交易开关',
+  },
+  {
+    field: 'type8_settings_time_range',
+    component: 'InputNumber',
+    label: '时间范围',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['时间范围', '比如设置1就是1秒内,设置2就是两秒内', '单位(秒)'],
+    rules: [{ required: true, type: 'number' }],
+    componentSlots: () => {
+      return {
+        prefix: () => '内',
+      };
+    },
+  },
+  {
+    field: 'type8_settings_buy_amount_range',
+    component: () => InputNumberRange,
+    colProps: {
+      span: 12,
+    },
+    label: '金额范围',
+    helpMessage: ['金额范围', '再规定时间范围内的购买的限制金额', '单位(sol)'],
+    rules: [
+      {
+        type: 'array',
+        trigger: 'change',
+        validator(_, value: string[]) {
+          // 如果值为空，直接通过验证
+          if (value.every((val) => val == null)) {
+            return Promise.resolve();
+          }
+
+          // 如果值不为空，验证格式
+          const isOk =
+            Array.isArray(value) &&
+            value.length === 2 &&
+            value.every((val) => /^(0|[1-9]\d*)(\.\d+)?$/.test(val));
+
+          return isOk ? Promise.resolve() : Promise.reject('请输入有效的数字范围');
+        },
+      },
+    ],
+    // 将多个值映射为多个字段
+    transform([minNum, maxNum] = []) {
+      if (!minNum && !maxNum) {
+        return [];
+      }
+      return [minNum, maxNum];
+    },
+  },
+  {
+    field: 'type8_settings_buy_odder_count',
+    component: 'InputNumber',
+    label: '买入单数',
+    colProps: {
+      span: 12,
+    },
+    helpMessage: ['买入单数', '规定时间范围，和金额范围内，买单出现的个数', '单位(个)'],
+    rules: [{ required: true, type: 'number' }],
+
+    componentSlots: () => {
+      return {
+        prefix: () => '≥',
+      };
+    },
+  },
 ];
